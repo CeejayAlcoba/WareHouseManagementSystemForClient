@@ -1,17 +1,22 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.5.33414.496
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.32630.194
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WareHouseManagementSystemForClient", "WareHouseManagementSystemForClient\WareHouseManagementSystemForClient.csproj", "{CA31DDB2-A14B-4B38-85E9-0A21DC721D55}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WareHouseManagementSystemForClient", "WareHouseManagementSystemForClient\WareHouseManagementSystemForClient.csproj", "{CA31DDB2-A14B-4B38-85E9-0A21DC721D55}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WareHouseManagementSystemForClient.Model", "WareHouseManagementSystemForClient.Model\WareHouseManagementSystemForClient.Model.csproj", "{3E7B363F-E306-4C56-9E9E-E686E5E75346}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WareHouseManagementSystemForClient.Model", "WareHouseManagementSystemForClient.Model\WareHouseManagementSystemForClient.Model.csproj", "{3E7B363F-E306-4C56-9E9E-E686E5E75346}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WareHouseManagementSystemForClient.DbContext", "WareHouseManagementSystemForClient.DbContext\WareHouseManagementSystemForClient.DbContext.csproj", "{23C20A38-F055-4469-8275-B0890442ADBC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WareHouseManagementSystemForClient.DbContext", "WareHouseManagementSystemForClient.DbContext\WareHouseManagementSystemForClient.DbContext.csproj", "{23C20A38-F055-4469-8275-B0890442ADBC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WareHouseManagementSystemForClient.Repositories", "WareHouseManagementSystemForClient.Repositories\WareHouseManagementSystemForClient.Repositories.csproj", "{46074D35-729F-4094-BC92-E6BF417EBB7B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WareHouseManagementSystemForClient.Repositories", "WareHouseManagementSystemForClient.Repositories\WareHouseManagementSystemForClient.Repositories.csproj", "{46074D35-729F-4094-BC92-E6BF417EBB7B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WareHousemanagementSystemForClient.Interfaces", "WareHousemanagementSystemForClient.Interfaces\WareHousemanagementSystemForClient.Interfaces.csproj", "{BD229D53-21DD-4224-A15C-B7AA4F5C13F5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WareHousemanagementSystemForClient.Interfaces", "WareHousemanagementSystemForClient.Interfaces\WareHousemanagementSystemForClient.Interfaces.csproj", "{BD229D53-21DD-4224-A15C-B7AA4F5C13F5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B050E121-5879-494F-AD57-5C4AB39B3524}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

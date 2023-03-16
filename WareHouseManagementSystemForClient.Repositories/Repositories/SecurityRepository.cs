@@ -20,11 +20,11 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
     public class SecurityRepository : ISecurityRepository
     {
         private readonly DapperContext _context;
-        private readonly IConfiguration _config;
-        public SecurityRepository(DapperContext context, IConfiguration config)
+        private readonly IConfiguration _configuration;
+        public SecurityRepository(DapperContext context, IConfiguration configuration)
         {
             _context = context;
-            _config = config;
+            _configuration = configuration;
         }
         public async Task<byte[]> GetClientSaltById(int id)
         {
@@ -47,28 +47,29 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
             Security hashSalt = new Security { Hash = passwordHashed, Salt = salt };
             return hashSalt;
         }
-        public string GenerateToken(Client client)
+        public string GenerateJSONWebToken(Client client)
         {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-            var claims = new[]
-            {
-                new Claim("id",client.ID.ToString()),
+
+            var claims = new[] {
+        new Claim("id",client.ID.ToString()),
                 new Claim("username", client.Username),
+                 new Claim("firstname", client.Firstname),
                 new Claim("lastname", client.Lastname),
                 new Claim("principal", client.Principal.ToString()),
-                new Claim("IsActive", client.IsActive.ToString()),
+                new Claim("principalName", client.PrincipalName),
+                new Claim("isActive", client.IsActive.ToString()),
+    };
 
-            };
-            var token = new JwtSecurityToken(_config["Jwt:Issuer"],
-                _config["Jwt:Audience"],
+            var token = new JwtSecurityToken(_configuration["Jwt:Issuer"],
+                _configuration["Jwt:Issuer"],
                 claims,
-                expires: DateTime.Now.AddMinutes(15),
+                expires: DateTime.Now.AddMinutes(10),
                 signingCredentials: credentials);
 
-
             return new JwtSecurityTokenHandler().WriteToken(token);
-
         }
+
     }
 }

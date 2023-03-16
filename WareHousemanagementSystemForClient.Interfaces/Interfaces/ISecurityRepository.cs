@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using WareHouseManagementSystemForClient.Model.ClientModels;
@@ -12,6 +14,6 @@ namespace WareHousemanagementSystemForClient.Interfaces.Interfaces
     {
         Security ToHash(string password, byte[] salt);
         Task<byte[]> GetClientSaltById(int id);
-        string GenerateToken(Client client);
+        string GenerateJSONWebToken(Client client);
     }
 }

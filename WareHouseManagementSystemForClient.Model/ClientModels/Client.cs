@@ -13,6 +13,7 @@ namespace WareHouseManagementSystemForClient.Model.ClientModels
         public string Firstname { get; set; }
         public string Lastname { get; set; }
         public int Principal { get; set; }
+        public string PrincipalName { get; set; }
         public bool IsActive { get; set; }
     }
 }
