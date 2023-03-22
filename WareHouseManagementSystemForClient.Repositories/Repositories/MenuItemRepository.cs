@@ -7,7 +7,6 @@ using System.Text;
 using System.Threading.Tasks;
 using WareHousemanagementSystemForClient.Interfaces.Interfaces;
 using WareHouseManagementSystemForClient.DbContext.Context;
-using WareHouseManagementSystemForClient.Model.ClientModels;
 using WareHouseManagementSystemForClient.Model.MenuItemModels;
 
 namespace WareHouseManagementSystemForClient.Repositories.Repositories
@@ -19,15 +18,15 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
         {
             _context = context;
         }
-        public async Task<MenuItem> GetMenuItems()
+        public async Task<IEnumerable<MenuItem>> GetMenuItems()
         {
             var procedureName = "GetMenuItems";
             using (var connection = _context.CreateConnection())
             {
-                var menuItems = await connection.QuerySingleAsync<MenuItem>
+                var menuItems = await connection.QueryAsync<MenuItem>
                    (procedureName,commandType: CommandType.StoredProcedure);
 
-                return menuItems;
+                return menuItems.ToList();
             }
         }
     }

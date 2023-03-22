@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using WareHouseManagementSystemForClient.Model.MenuItemModels;
+using WareHouseManagementSystemForClient.Model.PrincipalModels;
 
 namespace WareHousemanagementSystemForClient.Interfaces.Interfaces
 {
-    public interface IMenuItemRepository
+    public interface IPrincipalRepository
     {
-        Task<IEnumerable<MenuItem>> GetMenuItems();
+        Task<IEnumerable<ClientPrincipal>> GetClientPrincipalsByClientId(int clienId);
     }
 }

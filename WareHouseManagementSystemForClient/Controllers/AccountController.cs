@@ -24,7 +24,7 @@ namespace WareHouseManagementSystemForClient.Controllers
                var client = await _accountRepo.ClientLogin(credential);
                if(client != null)
                 {
-                    var token = _securityRepo.GenerateJSONWebToken(client);
+                    var token = await _securityRepo.GenerateJSONWebToken(client);
                     return Ok(token);
                 }
                 else

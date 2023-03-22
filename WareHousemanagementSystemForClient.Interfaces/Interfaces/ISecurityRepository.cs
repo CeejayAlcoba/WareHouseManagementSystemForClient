@@ -14,6 +14,6 @@ namespace WareHousemanagementSystemForClient.Interfaces.Interfaces
     {
         Security ToHash(string password, byte[] salt);
         Task<byte[]> GetClientSaltById(int id);
-        string GenerateJSONWebToken(Client client);
+        Task<string> GenerateJSONWebToken(Client client);
     }
 }
