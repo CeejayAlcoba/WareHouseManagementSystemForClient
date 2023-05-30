@@ -1,0 +1,5 @@
+0000000000000000000000000000000000000000 4e263a403fcd7bb52472f15d4d1b3215117cdae0 ceprinmac <60081669+ceprinmac@users.noreply.github.com> 1677291908 +0800	commit (initial): Add .gitattributes and .gitignore.
+4e263a403fcd7bb52472f15d4d1b3215117cdae0 32c4621273f64a23c6f6d4d48ffc61b8f39dd7a3 ceprinmac <60081669+ceprinmac@users.noreply.github.com> 1677291921 +0800	commit: Add project files.
+32c4621273f64a23c6f6d4d48ffc61b8f39dd7a3 632d259020c3ac6ddf100b9b2dc7e7857330a59a ceprinmac <60081669+ceprinmac@users.noreply.github.com> 1678949227 +0800	commit: add Cargo Details CBM, handling out/in and total items
+632d259020c3ac6ddf100b9b2dc7e7857330a59a d1cd11b042c78502ee51457b8120436d399037a4 ceprinmac <60081669+ceprinmac@users.noreply.github.com> 1679035836 +0800	commit: create menu items
+d1cd11b042c78502ee51457b8120436d399037a4 18c61fba94b15657fed92567159297332fee1a6d ceprinmac <60081669+ceprinmac@users.noreply.github.com> 1679469859 +0800	commit: getClientPrincipals

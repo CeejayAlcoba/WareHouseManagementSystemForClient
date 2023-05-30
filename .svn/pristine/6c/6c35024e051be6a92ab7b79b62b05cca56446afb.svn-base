@@ -1,0 +1,53 @@
+﻿using Dapper;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using WareHousemanagementSystemForClient.Interfaces.Interfaces;
+using WareHouseManagementSystemForClient.DbContext.Context;
+using WareHouseManagementSystemForClient.Model.CargoModels;
+
+namespace WareHouseManagementSystemForClient.Repositories.Repositories
+{
+    public class InventoryRepository : IInventoryRepository
+    {
+        private readonly DapperContext _context;
+        public InventoryRepository(DapperContext context)
+        {
+            _context = context;
+        }
+        public async Task<(IEnumerable<Inventory>, int)> GetInventoryList(DateTime? AcceptedDateFrom, DateTime? AcceptedDateTo, string? searchRep, int? categoryId, int principalId, int? cargoType, int rowSkip, int rowTake)
+        {
+            int customRowSkip = rowSkip * 10;
+            var procedureName = "GetInventoryList";
+            var parameters = new DynamicParameters();
+            parameters.Add("PrincipalId", principalId, DbType.Int64, ParameterDirection.Input);
+            using (var connection = _context.CreateConnection())
+            {
+                var inventories = await connection.QueryAsync<Inventory>(procedureName,parameters, commandTimeout:120,
+             commandType: CommandType.StoredProcedure);
+
+
+                if (AcceptedDateFrom != null && AcceptedDateTo != null) {
+                    inventories = inventories.Where(c => c.ActualCheckinDate >= AcceptedDateFrom && c.ActualCheckinDate<=AcceptedDateTo).ToList();
+                }
+                if (principalId != 0)
+                {
+                    inventories = inventories.Where(a => a.PrincipalId == principalId).ToList();
+                }
+                if (cargoType != 3)
+                {
+                    inventories = inventories.Where(a => a.CargoType == cargoType).ToList();
+                }
+                if (categoryId != 0 && categoryId != null)
+                {
+                    inventories = inventories.Where(a => a.ProductCategoryId == categoryId).ToList();
+                }
+
+                return (inventories.Skip(customRowSkip).Take(rowTake).ToList(), inventories.Count());
+            }
+        }
+    }
+}

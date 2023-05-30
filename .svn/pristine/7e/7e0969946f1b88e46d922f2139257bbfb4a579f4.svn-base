@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "RLr6iGHQ6FhSrbCIzNa6ZKbXnmbnwhb+PFMlY97kNl8=",
+  "Source": "WareHouseManagementSystemForClient",
+  "BasePath": "_content/WareHouseManagementSystemForClient",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

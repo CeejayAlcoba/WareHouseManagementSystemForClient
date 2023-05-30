@@ -1,0 +1,16 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "ConnectionStrings": {
+    "SqlConnection": "server=DESKTOP-HU0THE4\\SQLEXPRESSV12; database=WareHouseManagementSysytem; user id=princemm; password=princemm; Integrated Security=true;Encrypt=false"
+  },
+  "Jwt": {
+    "Key": "ThisismySecretKey",
+    "Issuer": "Test.com.ph"
+  },
+  "AllowedHosts": "*"
+}
