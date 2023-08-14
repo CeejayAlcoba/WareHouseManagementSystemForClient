@@ -68,7 +68,7 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
             var token = new JwtSecurityToken(_configuration["Jwt:Issuer"],
                 _configuration["Jwt:Issuer"],
                 claims,
-                expires: DateTime.Now.AddMonths(1),
+                expires: DateTime.UtcNow.AddDays(31),
                 signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
