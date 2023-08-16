@@ -11,6 +11,6 @@ namespace WareHouseManagementSystemForClient.Model.CargoModels
         public string CargoName { get; set; }
         public double TotalQuantity { get; set; }
         public string UnitOfMeasurement { get; set; }
-        public string BinLocation { get; set; }
+        public double TotalVolume { get; set; }
     }
 }

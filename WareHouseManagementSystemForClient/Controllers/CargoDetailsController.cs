@@ -9,7 +9,7 @@ namespace WareHouseManagementSystemForClient.Controllers
  
     [Route("api/cargo-details")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class CargoDetailsController : ControllerBase
     {
 
@@ -39,61 +39,29 @@ namespace WareHouseManagementSystemForClient.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        [HttpGet("total-items/{principalId}")]
-        public async Task<IActionResult> GetTotalItems(int principalId)
+        [HttpGet("CargoDetailsDashboard/{principalId}")]
+        public async Task<IActionResult> GetCargoDetailsDashboard(int principalId)
         {
             try
             {
-                var totalItems = await _cargoRepository.GetTotalItems(principalId);
-                
-                return Ok(totalItems);
+                var totalQuantity = await _cargoRepository.GetCargoDetailsTotalQuantity(principalId);
+                var totalVolume = await _cargoRepository.GetCargoDetailsTotalVolume(principalId);
+                var totalSKU = await _cargoRepository.GetCargoDetailsTotalSKU(principalId);
+                return Ok(new
+                {
+                    CargoDetails =(new
+                    {
+                        TotalQuantity = totalQuantity,
+                        TotalVolume = totalVolume,
+                        TotalSKU = totalSKU
+                    })
+                    
+                });
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
-            }
-        }
-        [HttpGet("total-handling-in/{principalId}")]
-        public async Task<IActionResult> GetTotalHandingIn(int principalId)
-        {
-            try
-            {
-                var totalItems = await _cargoRepository.GetTotalHandlingIn(principalId);
-
-                return Ok(totalItems);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-        [HttpGet("total-handling-out/{principalId}")]
-        public async Task<IActionResult> GetTotalHandingOut(int principalId)
-        {
-            try
-            {
-                var totalItems = await _cargoRepository.GetTotalHandlingOut(principalId);
-
-                return Ok(totalItems);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-        [HttpGet("cbm/{principalId}")]
-        public async Task<IActionResult> GetCBM(int principalId)
-        {
-            try
-            {
-                var totalItems = await _cargoRepository.GetCBM(principalId);
-
-                return Ok(totalItems);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+                return BadRequest(ex);
+            }  
         }
     }
 }

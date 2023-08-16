@@ -10,9 +10,8 @@ namespace WareHousemanagementSystemForClient.Interfaces.Interfaces
     public interface ICargoRepository
     {
         Task<(IEnumerable<CargoDetails>, int,double?)> GetAllByPrincipal(int principalId, int rowSkip, int rowTake);
-        Task<double> GetTotalItems(int principalId);
-        Task<double> GetTotalHandlingIn(int principalId);
-        Task<double> GetTotalHandlingOut(int principalId);
-        Task<double> GetCBM(int principalId);
+        Task<double> GetCargoDetailsTotalQuantity(int principalId);
+        Task<double> GetCargoDetailsTotalVolume(int principalId);
+        Task<double> GetCargoDetailsTotalSKU(int principalId);
     }
 }

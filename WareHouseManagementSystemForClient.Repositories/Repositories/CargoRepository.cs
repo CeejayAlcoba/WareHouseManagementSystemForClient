@@ -37,9 +37,9 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
                 return (cargoDetails.ToList().Skip(customRowSkip).Take(rowTake), totalCount, totalQuantity);
             }
         }
-        public async Task<double> GetTotalItems(int principalId)
+        public async Task<double> GetCargoDetailsTotalQuantity(int principalId)
         {
-            var procedureName = "GetCargoDetailsTotalItems";
+            var procedureName = "GetCargoDetailsTotalQuantity";
             var parameters = new DynamicParameters();
             parameters.Add("PrincipalId", principalId, DbType.Int64, ParameterDirection.Input);
             using (var connection = _context.CreateConnection())
@@ -49,34 +49,23 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
                 return Result;
             }
         }
-        public async Task<double> GetTotalHandlingIn(int principalId)
-        {
-            var procedureName = "GetCargoDetailsTotalHandlingIn";
-            var parameters = new DynamicParameters();
-            parameters.Add("PrincipalId", principalId, DbType.Int64, ParameterDirection.Input);
-            using (var connection = _context.CreateConnection())
-            {
-                var Result = await connection.QuerySingleAsync<double>(procedureName, parameters,
-             commandType: CommandType.StoredProcedure);
-                return Result;
-            }
-        }
-        public async Task<double> GetTotalHandlingOut(int principalId)
-        {
-            var procedureName = "GetCargoDetailsTotalHandlingOut";
-            var parameters = new DynamicParameters();
-            parameters.Add("PrincipalId", principalId, DbType.Int64, ParameterDirection.Input);
-            using (var connection = _context.CreateConnection())
-            {
-                var Result = await connection.QuerySingleAsync<double>(procedureName, parameters,
-             commandType: CommandType.StoredProcedure);
-                return Result;
-            }
-        }
+     
 
-        public async Task<double> GetCBM(int principalId)
+        public async Task<double> GetCargoDetailsTotalVolume(int principalId)
         {
-            var procedureName = "GetCargoDetailsCBM";
+            var procedureName = "GetCargoDetailsTotalVolume";
+            var parameters = new DynamicParameters();
+            parameters.Add("PrincipalId", principalId, DbType.Int64, ParameterDirection.Input);
+            using (var connection = _context.CreateConnection())
+            {
+                var Result = await connection.QuerySingleAsync<double>(procedureName, parameters,
+             commandType: CommandType.StoredProcedure);
+                return Result;
+            }
+        }
+        public async Task<double> GetCargoDetailsTotalSKU(int principalId)
+        {
+            var procedureName = "GetCargoDetailsTotalSKU";
             var parameters = new DynamicParameters();
             parameters.Add("PrincipalId", principalId, DbType.Int64, ParameterDirection.Input);
             using (var connection = _context.CreateConnection())
