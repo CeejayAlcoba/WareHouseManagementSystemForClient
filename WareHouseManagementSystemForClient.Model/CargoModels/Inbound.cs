@@ -8,6 +8,7 @@ namespace WareHouseManagementSystemForClient.Model.CargoModels
 {
     public class Inbound
     {
+        public string? CargoName { get; set; }
         public DateTime? DateAccepted { get; set; }
         public DateTime? ActualCheckinDate { get; set; }
         public int? ShipmentNo { get; set; }

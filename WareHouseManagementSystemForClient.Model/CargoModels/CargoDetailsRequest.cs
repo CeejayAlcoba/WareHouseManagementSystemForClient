@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 
 namespace WareHouseManagementSystemForClient.Model.CargoModels
 {
-    public class CargoDetails
+    public class CargoDetailsRequest
     {
+        public int PrincipalId { get; set; }
         public string CargoName { get; set; }
-        public double TotalQuantity { get; set; }
-        public string UnitOfMeasurement { get; set; }
-        public double TotalVolume { get; set; }
+
     }
 }

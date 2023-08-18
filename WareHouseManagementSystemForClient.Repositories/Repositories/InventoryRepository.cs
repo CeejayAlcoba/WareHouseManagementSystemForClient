@@ -22,9 +22,9 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
             _inboundRepository = inboundRepository;
             _outboundRepository = outboundRepository;
         }
-        public async Task<(IEnumerable<Inbound>, int,double?,double?)> GetInventoryList(DateTime? AcceptedDateFrom, DateTime? AcceptedDateTo, string? searchRep, int? categoryId, int principalId, int? cargoType, int rowSkip, int rowTake)
+        public async Task<(IEnumerable<Inbound>, int,double?,double?)> GetInventoryList(DateTime? AcceptedDateFrom, DateTime? AcceptedDateTo, string? searchRep, int? categoryId, int principalId, int? cargoType, int? rowSkip, int? rowTake)
         {
-            int customRowSkip = (rowSkip - 1) * 8;
+           
             var inventories = await GetInventoriesByPrincipalId(principalId);
             var inbounds = await _inboundRepository.GetAllInboundByPrincipal(principalId);
 
@@ -48,7 +48,7 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
             {
                 inbounds.Item1 = inbounds.Item1.Where(a => a.PrincipalId == principalId).ToList();
             }
-            if (cargoType != 3)
+            if (cargoType != 3 && cargoType!=null)
             {
                 inbounds.Item1 = inbounds.Item1.Where(a => a.CargoType == cargoType).ToList();
 
@@ -61,7 +61,15 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
             var filteredInbounds = inbounds.Item1.Where(a => a.Quantity > 0).ToList();
             var totalQuantity = filteredInbounds.Select(a=>a.Quantity).Sum();
             var totalVolume = filteredInbounds.Select(a => a.Volume).Sum();
-            return (filteredInbounds.Skip(customRowSkip).Take(rowTake), filteredInbounds.Count(),totalQuantity,totalVolume);
+            if (rowSkip != null && rowTake!=null)
+            {
+                int customRowSkip = ((int)rowSkip - 1) * 8;
+                return (filteredInbounds.Skip(customRowSkip).Take((int)rowTake), filteredInbounds.Count(), totalQuantity, totalVolume);
+            }
+            else
+            {
+                return (filteredInbounds, filteredInbounds.Count(), totalQuantity, totalVolume);
+            }
 
         }
         public async Task<IEnumerable<Inventory>> GetInventoriesByPrincipalId(int principalId)

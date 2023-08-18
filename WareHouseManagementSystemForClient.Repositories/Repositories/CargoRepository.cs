@@ -8,18 +8,20 @@ using System.Threading.Tasks;
 using WareHousemanagementSystemForClient.Interfaces.Interfaces;
 using WareHouseManagementSystemForClient.DbContext.Context;
 using WareHouseManagementSystemForClient.Model.CargoModels;
-using WareHouseManagementSystemForClient.Model.ClientModels;
+using WareHouseManagementSystemForClient.Model.CargoModelsForTable;
 
 namespace WareHouseManagementSystemForClient.Repositories.Repositories
 {
     public class CargoRepository : ICargoRepository
     {
         private readonly DapperContext _context;
-        public CargoRepository(DapperContext context)
+        private readonly IInventoryRepository _inventoryRepository;
+        public CargoRepository(DapperContext context, IInventoryRepository inventoryRepository)
         {
             _context = context;
+            _inventoryRepository = inventoryRepository;
         }
-        public async Task<(IEnumerable<CargoDetails>,int,double?)> GetAllByPrincipal(int principalId,int rowSkip,int rowTake)
+        public async Task<(IEnumerable<CargoDetailsForTable>, int, double?)> GetAllByPrincipal(int principalId, int rowSkip, int rowTake,string? search)
         {
             int customRowSkip = (rowSkip - 1) * 8;
             var procedureName = "GetCargoDetailsByPrincipal";
@@ -27,14 +29,35 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
             parameters.Add("Id", principalId, DbType.Int64, ParameterDirection.Input);
             using (var connection = _context.CreateConnection())
             {
-                var multiResult = await connection.QueryMultipleAsync(procedureName, parameters, commandTimeout:120,
+                var multiResult = await connection.QueryMultipleAsync(procedureName, parameters, commandTimeout: 120,
              commandType: CommandType.StoredProcedure);
                 var totalCount = await multiResult.ReadSingleOrDefaultAsync<int>();
-                var cargoDetails = await multiResult.ReadAsync<CargoDetails>();
+                var cargoDetails = await multiResult.ReadAsync<CargoDetailsForTable>();
 
-
-                var totalQuantity = cargoDetails.Select(a=>a.TotalQuantity).Sum();
+                if(search != null) {
+                    cargoDetails=cargoDetails.Where(
+                        c=>c.UnitOfMeasurement.ToString() == search ||
+                        c.CargoName == search ||
+                        c.TotalVolume.ToString() == search||
+                        c.TotalQuantity.ToString() == search
+                    );
+                }
+                totalCount = cargoDetails.Count();
+                var totalQuantity = cargoDetails.Select(a => a.TotalQuantity).Sum();
                 return (cargoDetails.ToList().Skip(customRowSkip).Take(rowTake), totalCount, totalQuantity);
+            }
+        }
+        public async Task<double> GetCargoDetailsByNameAndPrincipal(string cargoName, int principalId)
+        {
+            var procedureName = "GetCargoDetailsByNameAndPrincipal";
+            var parameters = new DynamicParameters();
+            parameters.Add("CargoName", cargoName, DbType.String, ParameterDirection.Input);
+            parameters.Add("PrincipalId", principalId, DbType.Int64, ParameterDirection.Input);
+            using (var connection = _context.CreateConnection())
+            {
+                var Result = await connection.QuerySingleAsync<double>(procedureName, parameters,
+             commandType: CommandType.StoredProcedure);
+                return Result;
             }
         }
         public async Task<double> GetCargoDetailsTotalQuantity(int principalId)
@@ -49,7 +72,7 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
                 return Result;
             }
         }
-     
+
 
         public async Task<double> GetCargoDetailsTotalVolume(int principalId)
         {
@@ -65,6 +88,7 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
         }
         public async Task<double> GetCargoDetailsTotalSKU(int principalId)
         {
+
             var procedureName = "GetCargoDetailsTotalSKU";
             var parameters = new DynamicParameters();
             parameters.Add("PrincipalId", principalId, DbType.Int64, ParameterDirection.Input);
@@ -74,6 +98,29 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
              commandType: CommandType.StoredProcedure);
                 return Result;
             }
+        }
+        public async Task<(double,IEnumerable<CargoDetailsForSKURecords>)> GetCargoDetailsSKURecords(int principalId, int? rowSkip, int? rowTake)
+        {
+
+            var inventories = await _inventoryRepository.GetInventoryList(null, null, null, null, principalId, null, null, null);
+            var inboundsList = inventories.Item1.Select(inventory => new CargoDetailsForSKURecords
+            {
+                CargoName = inventory.CargoName,
+                ICRReferenceNo = inventory.ICRReferenceNo,
+                Quantity = inventory.Quantity,
+                Uom = inventory.Uom,
+                Volume = inventory.Volume
+            }).OrderBy(c=>c.ICRReferenceNo);
+            if(rowTake != null && rowSkip !=null)
+            {
+                int customRowSkip = ((int)rowSkip - 1) * 8;
+                return (inboundsList.Count(), inboundsList.Skip(customRowSkip).Take((int)rowTake));
+            }
+            else
+            {
+                return (inboundsList.Count(), null);
+            }
+           
         }
     }
 }

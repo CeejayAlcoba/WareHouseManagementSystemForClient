@@ -9,6 +9,6 @@ namespace WareHousemanagementSystemForClient.Interfaces.Interfaces
 {
     public interface IInventoryRepository
     {
-        Task<(IEnumerable<Inbound>, int,double?,double?)> GetInventoryList(DateTime? AcceptedDateFrom, DateTime? AcceptedDateTo, string? searchRep, int? categoryId, int principalId, int? cargoType, int rowSkip, int rowTake);
+        Task<(IEnumerable<Inbound>, int,double?,double?)> GetInventoryList(DateTime? AcceptedDateFrom, DateTime? AcceptedDateTo, string? searchRep, int? categoryId, int principalId, int? cargoType, int? rowSkip, int? rowTake);
     }
 }
