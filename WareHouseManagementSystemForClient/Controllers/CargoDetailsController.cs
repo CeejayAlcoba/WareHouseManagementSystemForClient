@@ -22,15 +22,11 @@ namespace WareHouseManagementSystemForClient.Controllers
             _inventoryRepository = inventoryRepository;
         }
         [HttpPost]
-        public async Task<IActionResult> GetAllByPrincipal(int principalId, int rowSkip, int rowTake,string? search)
+        public async Task<IActionResult> GetAllByPrincipal(int principalId, int? rowSkip, int? rowTake,string? search)
         {
             try
             {
                 var cargoDetails = await _cargoRepository.GetAllByPrincipal(principalId, rowSkip, rowTake, search);
-                if (cargoDetails.Item1 == null)
-                {
-                    return NotFound();
-                }
                 return Ok(new
                 {
                     CargoDetails = cargoDetails.Item1,
@@ -50,14 +46,14 @@ namespace WareHouseManagementSystemForClient.Controllers
             {
                 var totalQuantity = await _cargoRepository.GetCargoDetailsTotalQuantity(principalId);
                 var totalVolume = await _cargoRepository.GetCargoDetailsTotalVolume(principalId);
-                var skuRecords = await _cargoRepository.GetCargoDetailsSKURecords(principalId,null,null);
+                var totalSKU = await _cargoRepository.GetCargoDetailsTotalSKU(principalId);
                 return Ok(new
                 {
                     CargoDetails = (new
                     {
                         TotalQuantity = totalQuantity,
                         TotalVolume = totalVolume,
-                        TotalSKU = skuRecords.Item1
+                        TotalSKU = totalSKU
                     })
 
                 });
@@ -68,9 +64,9 @@ namespace WareHouseManagementSystemForClient.Controllers
             }
         }
         [HttpGet("sku-records/{principalId}")]
-        public async Task<IActionResult> GetSKURecords(int principalId, int rowSkip, int rowTake)
+        public async Task<IActionResult> GetSKURecords(int principalId, int? rowSkip, int? rowTake,string? search)
         {
-            var skus = await _cargoRepository.GetCargoDetailsSKURecords(principalId, rowSkip, rowTake);
+            var skus = await _cargoRepository.GetCargoDetailsSKURecords(principalId, rowSkip, rowTake, search);
             return Ok(new
             {
                 totalCount = skus.Item1,
@@ -86,9 +82,17 @@ namespace WareHouseManagementSystemForClient.Controllers
             {
                 var inventory = await _inventoryRepository.GetInventoryList(null, null, null, null, cargoDetailsRequest.PrincipalId, null, null, null);
                 var cargoDetailsNameFitered = inventory.Item1.Where(a => a.CargoName == cargoDetailsRequest.CargoName);
+                int totalCount = cargoDetailsNameFitered.Count();
+                if (cargoDetailsRequest.RowTake!=null && cargoDetailsRequest.RowSkip!=null)
+                {
+                    int customRowSkip = ((int)cargoDetailsRequest.RowSkip - 1) * 8;
+                    cargoDetailsNameFitered = cargoDetailsNameFitered.Skip(customRowSkip).Take((int)cargoDetailsRequest.RowTake);
+                }
+             
                 return Ok(new
                 {
-                    CargoDetails = cargoDetailsNameFitered
+                    CargoDetails = cargoDetailsNameFitered,
+                    TotalCount = totalCount,
 
                 });
             }

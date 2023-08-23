@@ -10,6 +10,8 @@ namespace WareHouseManagementSystemForClient.Model.CargoModels
     {
         public int PrincipalId { get; set; }
         public string CargoName { get; set; }
+        public int? RowTake { get; set; }
+        public int? RowSkip { get; set; }
 
     }
 }

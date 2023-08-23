@@ -21,9 +21,9 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
             _context = context;
             _inventoryRepository = inventoryRepository;
         }
-        public async Task<(IEnumerable<CargoDetailsForTable>, int, double?)> GetAllByPrincipal(int principalId, int rowSkip, int rowTake,string? search)
+        public async Task<(IEnumerable<CargoDetailsForTable>, int, double?)> GetAllByPrincipal(int principalId, int? rowSkip, int? rowTake,string? search)
         {
-            int customRowSkip = (rowSkip - 1) * 8;
+           
             var procedureName = "GetCargoDetailsByPrincipal";
             var parameters = new DynamicParameters();
             parameters.Add("Id", principalId, DbType.Int64, ParameterDirection.Input);
@@ -42,24 +42,20 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
                         c.TotalQuantity.ToString() == search
                     );
                 }
+
                 totalCount = cargoDetails.Count();
                 var totalQuantity = cargoDetails.Select(a => a.TotalQuantity).Sum();
-                return (cargoDetails.ToList().Skip(customRowSkip).Take(rowTake), totalCount, totalQuantity);
+
+                if (rowSkip!=null && rowTake!=null)
+                {
+                    int customRowSkip = ((int)rowSkip - 1) * 8;
+                    cargoDetails = cargoDetails.Skip(customRowSkip).Take((int)rowTake);
+                }
+                
+                return (cargoDetails.ToList(), totalCount, totalQuantity);
             }
         }
-        public async Task<double> GetCargoDetailsByNameAndPrincipal(string cargoName, int principalId)
-        {
-            var procedureName = "GetCargoDetailsByNameAndPrincipal";
-            var parameters = new DynamicParameters();
-            parameters.Add("CargoName", cargoName, DbType.String, ParameterDirection.Input);
-            parameters.Add("PrincipalId", principalId, DbType.Int64, ParameterDirection.Input);
-            using (var connection = _context.CreateConnection())
-            {
-                var Result = await connection.QuerySingleAsync<double>(procedureName, parameters,
-             commandType: CommandType.StoredProcedure);
-                return Result;
-            }
-        }
+
         public async Task<double> GetCargoDetailsTotalQuantity(int principalId)
         {
             var procedureName = "GetCargoDetailsTotalQuantity";
@@ -99,10 +95,11 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
                 return Result;
             }
         }
-        public async Task<(double,IEnumerable<CargoDetailsForSKURecords>)> GetCargoDetailsSKURecords(int principalId, int? rowSkip, int? rowTake)
+        public async Task<(double,IEnumerable<CargoDetailsForSKURecords>)> GetCargoDetailsSKURecords(int principalId, int? rowSkip, int? rowTake,string? search)
         {
 
             var inventories = await _inventoryRepository.GetInventoryList(null, null, null, null, principalId, null, null, null);
+
             var inboundsList = inventories.Item1.Select(inventory => new CargoDetailsForSKURecords
             {
                 CargoName = inventory.CargoName,
@@ -110,15 +107,26 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
                 Quantity = inventory.Quantity,
                 Uom = inventory.Uom,
                 Volume = inventory.Volume
-            }).OrderBy(c=>c.ICRReferenceNo);
-            if(rowTake != null && rowSkip !=null)
+            }).OrderBy(c => c.ICRReferenceNo);
+
+            if (search != null)
+            {
+                inboundsList = inboundsList.Where(c =>
+                    c.Quantity.ToString() == search ||
+                    c.ICRReferenceNo == search ||
+                    c.CargoName == search ||
+                    c.Volume.ToString() == search ||
+                    c.Uom == search
+                ).OrderBy(c => c.ICRReferenceNo);
+            }
+            if (rowTake != null && rowSkip !=null)
             {
                 int customRowSkip = ((int)rowSkip - 1) * 8;
                 return (inboundsList.Count(), inboundsList.Skip(customRowSkip).Take((int)rowTake));
             }
             else
             {
-                return (inboundsList.Count(), null);
+                return (inboundsList.Count(), inboundsList);
             }
            
         }
