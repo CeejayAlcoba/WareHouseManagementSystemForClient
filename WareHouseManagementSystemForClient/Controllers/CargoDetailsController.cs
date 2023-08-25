@@ -44,16 +44,14 @@ namespace WareHouseManagementSystemForClient.Controllers
         {
             try
             {
-                var totalQuantity = await _cargoRepository.GetCargoDetailsTotalQuantity(principalId);
-                var totalVolume = await _cargoRepository.GetCargoDetailsTotalVolume(principalId);
-                var totalSKU = await _cargoRepository.GetCargoDetailsTotalSKU(principalId);
+                var inventories = await _inventoryRepository.GetInventoryList(null, null, null, null, principalId, null, null, null);
                 return Ok(new
                 {
                     CargoDetails = (new
                     {
-                        TotalQuantity = totalQuantity,
-                        TotalVolume = totalVolume,
-                        TotalSKU = totalSKU
+                        TotalSKU = inventories.Item2,
+                        TotalQuantity = inventories.Item3,
+                        TotalVolume = inventories.Item4
                     })
 
                 });

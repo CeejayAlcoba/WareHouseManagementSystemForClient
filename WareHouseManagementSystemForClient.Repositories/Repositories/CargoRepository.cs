@@ -56,45 +56,6 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
             }
         }
 
-        public async Task<double> GetCargoDetailsTotalQuantity(int principalId)
-        {
-            var procedureName = "GetCargoDetailsTotalQuantity";
-            var parameters = new DynamicParameters();
-            parameters.Add("PrincipalId", principalId, DbType.Int64, ParameterDirection.Input);
-            using (var connection = _context.CreateConnection())
-            {
-                var Result = await connection.QuerySingleAsync<double>(procedureName, parameters,
-             commandType: CommandType.StoredProcedure);
-                return Result;
-            }
-        }
-
-
-        public async Task<double> GetCargoDetailsTotalVolume(int principalId)
-        {
-            var procedureName = "GetCargoDetailsTotalVolume";
-            var parameters = new DynamicParameters();
-            parameters.Add("PrincipalId", principalId, DbType.Int64, ParameterDirection.Input);
-            using (var connection = _context.CreateConnection())
-            {
-                var Result = await connection.QuerySingleAsync<double>(procedureName, parameters,
-             commandType: CommandType.StoredProcedure);
-                return Result;
-            }
-        }
-        public async Task<double> GetCargoDetailsTotalSKU(int principalId)
-        {
-
-            var procedureName = "GetCargoDetailsTotalSKU";
-            var parameters = new DynamicParameters();
-            parameters.Add("PrincipalId", principalId, DbType.Int64, ParameterDirection.Input);
-            using (var connection = _context.CreateConnection())
-            {
-                var Result = await connection.QuerySingleAsync<double>(procedureName, parameters,
-             commandType: CommandType.StoredProcedure);
-                return Result;
-            }
-        }
         public async Task<(double,IEnumerable<CargoDetailsForSKURecords>)> GetCargoDetailsSKURecords(int principalId, int? rowSkip, int? rowTake,string? search)
         {
 
