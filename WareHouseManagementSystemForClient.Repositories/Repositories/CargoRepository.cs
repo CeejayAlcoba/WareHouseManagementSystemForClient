@@ -67,7 +67,11 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
                 ICRReferenceNo = inventory.ICRReferenceNo,
                 Quantity = inventory.Quantity,
                 Uom = inventory.Uom,
-                Volume = inventory.Volume
+                Volume = inventory.Volume,
+                   DateAccepted = inventory.DateAccepted,
+                ActualCheckinDate = inventory.ActualCheckinDate,
+                ExpirationDate = inventory.ExpirationDate,
+                DeliveryDate = inventory.DeliveryDate,
             }).OrderBy(c => c.ICRReferenceNo);
 
             if (search != null)
@@ -77,7 +81,11 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
                     c.ICRReferenceNo == search ||
                     c.CargoName == search ||
                     c.Volume.ToString() == search ||
-                    c.Uom == search
+                    c.Uom == search ||
+                    c.DateAccepted.ToString() == search ||
+                    c.ActualCheckinDate.ToString() == search ||
+                    c.ExpirationDate.ToString() == search ||
+                    c.DeliveryDate.ToString() == search 
                 ).OrderBy(c => c.ICRReferenceNo);
             }
             if (rowTake != null && rowSkip !=null)

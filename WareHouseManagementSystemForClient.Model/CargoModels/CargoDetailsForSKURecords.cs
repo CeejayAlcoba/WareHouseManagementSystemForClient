@@ -13,5 +13,10 @@ namespace WareHouseManagementSystemForClient.Model.CargoModels
         public double? Quantity { get; set; }
         public string? Uom { get; set; }
         public double? Volume { get; set; }
+        public DateTime? DateAccepted { get; set; }
+        public DateTime? ActualCheckinDate { get; set; }
+        public DateTime? ExpirationDate { get; set; }
+        public DateTime? DateReleased { get; set; }
+        public DateTime? DeliveryDate { get; set; }
     }
 }
