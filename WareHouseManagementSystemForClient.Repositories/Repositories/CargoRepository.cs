@@ -59,7 +59,7 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
         public async Task<(double,IEnumerable<CargoDetailsForSKURecords>)> GetCargoDetailsSKURecords(int principalId, int? rowSkip, int? rowTake,string? search)
         {
 
-            var inventories = await _inventoryRepository.GetInventoryList(null, null, null, null, principalId, null, null, null);
+            var inventories = await _inventoryRepository.GetInventoryList(null, null, null, principalId, null, null, null);
 
             var inboundsList = inventories.Item1.Select(inventory => new CargoDetailsForSKURecords
             {
@@ -98,6 +98,18 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
                 return (inboundsList.Count(), inboundsList);
             }
            
+        }
+        public async Task<IEnumerable<string>> GetAllSKUByPrincipalId(int principalId)
+        {
+            var procedureName = "GetAllSKUByPrincipalId";
+            var parameters = new DynamicParameters();
+            parameters.Add("PrincipalId", principalId, DbType.Int64, ParameterDirection.Input);
+            using (var connection = _context.CreateConnection())
+            {
+                var skus = await connection.QueryAsync<string>(procedureName,parameters, commandTimeout: 120,
+             commandType: CommandType.StoredProcedure);
+                return (IEnumerable<string>)skus;
+            }
         }
     }
 }

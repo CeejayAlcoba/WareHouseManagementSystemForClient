@@ -23,7 +23,6 @@ builder.Services.AddScoped<IPrincipalRepository, PrincipalRepository>();
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 builder.Services.AddScoped<IInboundRepository, InboundRepository>();
 builder.Services.AddScoped<IOutboundRepository, OutboundRepository>();
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddControllers();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

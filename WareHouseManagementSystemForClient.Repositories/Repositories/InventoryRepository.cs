@@ -22,27 +22,25 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
             _inboundRepository = inboundRepository;
             _outboundRepository = outboundRepository;
         }
-        public async Task<(IEnumerable<Inbound>, int,double?,double?)> GetInventoryList(DateTime? AcceptedDateFrom, DateTime? AcceptedDateTo, string? searchRep, int? categoryId, int principalId, int? cargoType, int? rowSkip, int? rowTake)
+        public async Task<(IEnumerable<Inbound>, int,double?,double?)> GetInventoryList(DateTime? asOfDate, string? search, string? sku, int principalId, int? cargoType, int? rowSkip, int? rowTake)
         {
            
             var inventories = await GetInventoriesByPrincipalId(principalId);
             var inbounds = await _inboundRepository.GetAllInboundByPrincipal(principalId);
-
+            var inventoryDictionary = inventories.ToDictionary(inv => inv.BookingId);
             foreach (var inbound in inbounds.Item1)
             {
-                foreach(var inventory in inventories)
+                if (inventoryDictionary.TryGetValue(inbound.BookingId, out var inventory))
                 {
-                    if(inventory.BookingId == inbound.BookingId)
-                    {
-                        inbound.Quantity = inventory.Quantity;
-                        inbound.Volume = inventory.Volume;
-                        inbound.DateReleased = inventory.DateReleased;
-                    }
+                    // Overwrite values in the inbound object
+                    inbound.Quantity = inventory.Quantity;
+                    inbound.Volume = inventory.Volume;
+                    inbound.DateReleased = inventory.DateReleased;
                 }
             }
-            if (AcceptedDateFrom != null && AcceptedDateTo != null)
+            if (asOfDate != null)
             {
-                inbounds.Item1 = inbounds.Item1.Where(c => c.ActualCheckinDate >= AcceptedDateFrom && c.ActualCheckinDate <= AcceptedDateTo).ToList();
+                inbounds.Item1 = inbounds.Item1.Where(c => c.ActualCheckinDate <= asOfDate).ToList();
             }
             if (principalId != 0)
             {
@@ -53,9 +51,9 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
                 inbounds.Item1 = inbounds.Item1.Where(a => a.CargoType == cargoType).ToList();
 
             }
-            if (categoryId != 0 && categoryId != null)
+            if (sku != null)
             {
-                inbounds.Item1 = inbounds.Item1.Where(a => a.ProductCategoryId == categoryId).ToList();
+                inbounds.Item1 = inbounds.Item1.Where(a => a.CargoName == sku).ToList();
             }
 
             var filteredInbounds = inbounds.Item1.Where(a => a.Quantity > 0).ToList();

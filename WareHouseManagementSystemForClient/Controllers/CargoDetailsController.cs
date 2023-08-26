@@ -44,7 +44,7 @@ namespace WareHouseManagementSystemForClient.Controllers
         {
             try
             {
-                var inventories = await _inventoryRepository.GetInventoryList(null, null, null, null, principalId, null, null, null);
+                var inventories = await _inventoryRepository.GetInventoryList(null, null, null, principalId, null, null, null);
                 return Ok(new
                 {
                     CargoDetails = (new
@@ -78,7 +78,7 @@ namespace WareHouseManagementSystemForClient.Controllers
         {
             try
             {
-                var inventory = await _inventoryRepository.GetInventoryList(null, null, null, null, cargoDetailsRequest.PrincipalId, null, null, null);
+                var inventory = await _inventoryRepository.GetInventoryList(null, null, null, cargoDetailsRequest.PrincipalId, null, null, null);
                 var cargoDetailsNameFitered = inventory.Item1.Where(a => a.CargoName == cargoDetailsRequest.CargoName);
                 int totalCount = cargoDetailsNameFitered.Count();
                 if (cargoDetailsRequest.RowTake!=null && cargoDetailsRequest.RowSkip!=null)
@@ -91,6 +91,24 @@ namespace WareHouseManagementSystemForClient.Controllers
                 {
                     CargoDetails = cargoDetailsNameFitered,
                     TotalCount = totalCount,
+
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
+        }
+        [HttpGet("all-skus/{principalId}")]
+        public async Task<IActionResult> GetAllSKUByPrincipalId(int principalId)
+        {
+            try
+            {
+                var skus = await _cargoRepository.GetAllSKUByPrincipalId(principalId);
+
+                return Ok(new
+                {
+                    Skus = skus
 
                 });
             }
