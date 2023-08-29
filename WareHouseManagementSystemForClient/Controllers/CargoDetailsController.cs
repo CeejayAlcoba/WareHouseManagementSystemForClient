@@ -99,12 +99,12 @@ namespace WareHouseManagementSystemForClient.Controllers
                 return BadRequest(ex);
             }
         }
-        [HttpGet("all-skus/{principalId}")]
-        public async Task<IActionResult> GetAllSKUByPrincipalId(int principalId)
+        [HttpGet("sku-names/{principalId}")]
+        public async Task<IActionResult> GetSKUNamesByPrincipalId(int principalId)
         {
             try
             {
-                var skus = await _cargoRepository.GetAllSKUByPrincipalId(principalId);
+                var skus = await _cargoRepository.GetSKUNamesByPrincipalId(principalId);
 
                 return Ok(new
                 {

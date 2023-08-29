@@ -12,6 +12,6 @@ namespace WareHousemanagementSystemForClient.Interfaces.Interfaces
     {
         Task<(IEnumerable<CargoDetailsForTable>, int, double?)> GetAllByPrincipal(int principalId, int? rowSkip, int? rowTake,string? search);
         Task<(double, IEnumerable<CargoDetailsForSKURecords>)> GetCargoDetailsSKURecords(int principalId, int? rowSkip, int? rowTake, string? search);
-        Task<IEnumerable<string>> GetAllSKUByPrincipalId(int principalId);
+        Task<IEnumerable<string>> GetSKUNamesByPrincipalId(int principalId);
     }
 }

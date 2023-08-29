@@ -99,9 +99,9 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
             }
            
         }
-        public async Task<IEnumerable<string>> GetAllSKUByPrincipalId(int principalId)
+        public async Task<IEnumerable<string>> GetSKUNamesByPrincipalId(int principalId)
         {
-            var procedureName = "GetAllSKUByPrincipalId";
+            var procedureName = "GetSKUNamesByPrincipalId";
             var parameters = new DynamicParameters();
             parameters.Add("PrincipalId", principalId, DbType.Int64, ParameterDirection.Input);
             using (var connection = _context.CreateConnection())
