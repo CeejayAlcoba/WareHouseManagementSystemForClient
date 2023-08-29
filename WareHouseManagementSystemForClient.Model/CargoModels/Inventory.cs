@@ -9,10 +9,14 @@ namespace WareHouseManagementSystemForClient.Model.CargoModels
     public class Inventory
     {
         public int BookingId { get; set; }
-        public double? Quantity { get; set; }
-        public double? Volume { get; set; }
         public DateTime? DateReleased { get; set; }
+        public double? InboundQuantity { get; set; }
+        public double? OutboundQuantity { get; set; }
+        public double? Balance { get; set; }
+        public double? Volume { get; set; }
 
+
+        //public double? Quantity { get; set; }
         //public int Id { get; set; }
         //public int BookingId { get; set; }
         //public int PrincipalId { get; set; }

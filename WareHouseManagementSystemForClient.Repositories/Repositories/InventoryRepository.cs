@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using WareHousemanagementSystemForClient.Interfaces.Interfaces;
 using WareHouseManagementSystemForClient.DbContext.Context;
 using WareHouseManagementSystemForClient.Model.CargoModels;
@@ -22,20 +23,25 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
             _inboundRepository = inboundRepository;
             _outboundRepository = outboundRepository;
         }
-        public async Task<(IEnumerable<Inbound>, int,double?,double?)> GetInventoryList(DateTime? asOfDate, string? search, string? sku, int principalId, int? cargoType, int? rowSkip, int? rowTake)
+        public async Task<(IEnumerable<Inbound>, int, double?, double?)> GetInventoryList(DateTime? asOfDate, string? search, string? sku, int principalId, int? cargoType, int? rowSkip, int? rowTake)
         {
-           
+
             var inventories = await GetInventoriesByPrincipalId(principalId);
             var inbounds = await _inboundRepository.GetAllInboundByPrincipal(principalId);
-            var inventoryDictionary = inventories.ToDictionary(inv => inv.BookingId);
+
+            //overwriting
             foreach (var inbound in inbounds.Item1)
             {
-                if (inventoryDictionary.TryGetValue(inbound.BookingId, out var inventory))
+                foreach (var inventory in inventories)
                 {
-                    // Overwrite values in the inbound object
-                    inbound.Quantity = inventory.Quantity;
-                    inbound.Volume = inventory.Volume;
-                    inbound.DateReleased = inventory.DateReleased;
+                    if (inventory.BookingId == inbound.BookingId)
+                    {
+                        inbound.Volume = inventory.Volume;
+                        inbound.DateReleased = inventory.DateReleased;
+                        inbound.InboundQuantity = inventory.InboundQuantity;
+                        inbound.OutboundQuantity = inventory.OutboundQuantity;
+                        inbound.Balance = inventory.Balance;
+                    }
                 }
             }
             if (asOfDate != null)
@@ -46,7 +52,7 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
             {
                 inbounds.Item1 = inbounds.Item1.Where(a => a.PrincipalId == principalId).ToList();
             }
-            if (cargoType != 3 && cargoType!=null)
+            if (cargoType != 3 && cargoType != null)
             {
                 inbounds.Item1 = inbounds.Item1.Where(a => a.CargoType == cargoType).ToList();
 
@@ -56,10 +62,11 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
                 inbounds.Item1 = inbounds.Item1.Where(a => a.CargoName == sku).ToList();
             }
 
-            var filteredInbounds = inbounds.Item1.Where(a => a.Quantity > 0).ToList();
-            var totalQuantity = filteredInbounds.Select(a=>a.Quantity).Sum();
+            var filteredInbounds = inbounds.Item1.Where(a => a.Balance > 0).ToList();
+            var totalQuantity = filteredInbounds.Select(a => a.Balance).Sum();
             var totalVolume = filteredInbounds.Select(a => a.Volume).Sum();
-            if (rowSkip != null && rowTake!=null)
+
+            if (rowSkip != null && rowTake != null)
             {
                 int customRowSkip = ((int)rowSkip - 1) * 8;
                 return (filteredInbounds.Skip(customRowSkip).Take((int)rowTake), filteredInbounds.Count(), totalQuantity, totalVolume);

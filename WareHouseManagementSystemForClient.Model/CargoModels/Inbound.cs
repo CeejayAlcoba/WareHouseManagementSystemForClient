@@ -36,6 +36,10 @@ namespace WareHouseManagementSystemForClient.Model.CargoModels
         public string? Address { get; set; }
 
 
+        public double? InboundQuantity { get; set; }
+        public double? OutboundQuantity { get; set; }
+        public double? Balance { get; set; }
+
         public int BookingId { get; set; }
         public DateTime? DateReleased { get; set; }
         public string? ItemCode { get; set; }
