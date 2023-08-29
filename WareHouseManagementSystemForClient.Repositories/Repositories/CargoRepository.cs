@@ -65,7 +65,7 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
             {
                 CargoName = inventory.CargoName,
                 ICRReferenceNo = inventory.ICRReferenceNo,
-                Quantity = inventory.Quantity,
+                Balance = inventory.Balance,
                 Uom = inventory.Uom,
                 Volume = inventory.Volume,
                    DateAccepted = inventory.DateAccepted,
@@ -77,7 +77,7 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
             if (search != null)
             {
                 inboundsList = inboundsList.Where(c =>
-                    c.Quantity.ToString() == search ||
+                    c.Balance.ToString() == search ||
                     c.ICRReferenceNo == search ||
                     c.CargoName == search ||
                     c.Volume.ToString() == search ||

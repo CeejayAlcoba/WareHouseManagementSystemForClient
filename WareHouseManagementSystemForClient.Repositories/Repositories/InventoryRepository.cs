@@ -28,7 +28,6 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
 
             var inventories = await GetInventoriesByPrincipalId(principalId);
             var inbounds = await _inboundRepository.GetAllInboundByPrincipal(principalId);
-
             //overwriting
             foreach (var inbound in inbounds.Item1)
             {
