@@ -61,6 +61,18 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
                 inbounds.Item1 = inbounds.Item1.Where(a => a.CargoName == sku).ToList();
             }
 
+            if (search != null)
+            {
+                inbounds.Item1 = inbounds.Item1
+                    .Where(item => item.GetType().GetProperties().Any(property =>
+                    {
+                        var value = property.GetValue(item)?.ToString();
+                        return value != null && value == search;
+                    }))
+                    .ToList();
+            }
+
+
             var filteredInbounds = inbounds.Item1.Where(a => a.Balance > 0).ToList();
             var totalQuantity = filteredInbounds.Select(a => a.Balance).Sum();
             var totalVolume = filteredInbounds.Select(a => a.Volume).Sum();

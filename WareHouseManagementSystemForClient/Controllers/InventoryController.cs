@@ -15,7 +15,7 @@ namespace WareHouseManagementSystemForClient.Controllers
             _inventoryRepository = inventoryRepository;
         }
         [HttpPost]
-        public async Task<IActionResult> GetInventoryList(DateTime? asOfDate, string? search, string? sku, int principalId, int? cargoType, int rowSkip, int rowTake)
+        public async Task<IActionResult> GetInventoryList(DateTime? asOfDate, string? search, string? sku, int principalId, int? cargoType, int? rowSkip, int? rowTake)
         {
             try
             {
