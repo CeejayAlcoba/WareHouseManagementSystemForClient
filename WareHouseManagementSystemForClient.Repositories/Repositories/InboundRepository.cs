@@ -18,40 +18,58 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
         {
             _context = context;
         }
-        public async Task<(IEnumerable<Inbound>, int,double?,double?)> GetInboundList(DateTime? AcceptedDateFrom, DateTime? AcceptedDateTo, string? searchRep, int? categoryId, int principalId, int? cargoType, int rowSkip, int rowTake)
+        public async Task<(IEnumerable<Inbound>, int, double?, double?)> GetInboundList(DateTime? asOfDate, string? search, string? sku, int principalId, int? cargoType, int? rowSkip, int? rowTake)
         {
-            int customRowSkip = (rowSkip - 1) * rowTake;
+
             var procedureName = "GetInboundList";
             var parameters = new DynamicParameters();
             parameters.Add("PrincipalId", principalId, DbType.Int64, ParameterDirection.Input);
             using (var connection = _context.CreateConnection())
             {
-            
-                    var inbounds = await connection.QueryAsync<Inbound>(procedureName, parameters, commandTimeout: 120,
-           commandType: CommandType.StoredProcedure);
-                    
-                    if (AcceptedDateFrom != null && AcceptedDateTo != null)
-                    {
-                    inbounds = inbounds.Where(c => c.ActualCheckinDate >= AcceptedDateFrom && c.ActualCheckinDate <= AcceptedDateTo).ToList();
-                    }
-                    if (principalId != 0)
-                    {
+
+                var inbounds = await connection.QueryAsync<Inbound>(procedureName, parameters, commandTimeout: 120,
+       commandType: CommandType.StoredProcedure);
+
+                if (asOfDate != null)
+                {
+                    inbounds = inbounds.Where(c => c.ActualCheckinDate <= asOfDate).ToList();
+                }
+                if (principalId != 0)
+                {
                     inbounds = inbounds.Where(a => a.PrincipalId == principalId).ToList();
 
-                    }
-                    if (cargoType != 3)
-                    {
+                }
+                if (cargoType != 3)
+                {
                     inbounds = inbounds.Where(a => a.CargoType == cargoType).ToList();
 
-                    }
-                    if (categoryId != 0 && categoryId != null)
-                    {
-                    inbounds = inbounds.Where(a => a.ProductCategoryId == categoryId).ToList();
-                    }
-                    var totalQuantity= inbounds.Select(a => a.Quantity).Sum();
-                    var totalVolume = inbounds.Select(a=>a.Volume).Sum();
-           
-                return (inbounds.ToList().Skip(customRowSkip).Take(rowTake), inbounds.Count(), totalQuantity, totalVolume);
+                }
+                if (sku != null)
+                {
+                    inbounds = inbounds.Where(a => a.CargoName == sku).ToList();
+                }
+                if (search != null)
+                {
+                    inbounds = inbounds
+                        .Where(item => item.GetType().GetProperties().Any(property =>
+                        {
+                            var value = property.GetValue(item)?.ToString();
+                            return value != null && value == search;
+                        }))
+                        .ToList();
+                }
+                var totalBalance = inbounds.Select(a => a.Balance).Sum();
+                var totalVolume = inbounds.Select(a => a.Volume).Sum();
+                if (rowSkip != null && rowTake != null)
+                {
+                    int customRowSkip = ((int)rowSkip - 1) * (int)rowTake;
+
+                    return (inbounds.ToList().Skip(customRowSkip).Take((int)rowTake), inbounds.Count(), totalBalance, totalVolume);
+                }
+                else
+                {
+                    return (inbounds.ToList(), inbounds.Count(), totalBalance, totalVolume);
+                }
             }
         }
         public async Task<(IEnumerable<Inbound>, int)> GetAllInboundByPrincipal(int principalId)
@@ -64,7 +82,7 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
                 var inbounds = await connection.QueryAsync<Inbound>(procedureName, parameters, commandTimeout: 120,
              commandType: CommandType.StoredProcedure);
 
-              
+
                 return (inbounds.ToList(), inbounds.Count());
 
 

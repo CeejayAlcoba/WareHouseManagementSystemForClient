@@ -34,9 +34,9 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
             }
         }
 
-        public async Task<(IEnumerable<Outbound>, int,double?,double?)> GetOutboundList(DateTime? AcceptedDateFrom, DateTime? AcceptedDateTo, string? searchRep, int? categoryId, int principalId, int? cargoType, int rowSkip, int rowTake)
+        public async Task<(IEnumerable<Outbound>, int, double?, double?)> GetOutboundList(DateTime? asOfDate, string? search, string? sku, int principalId, int? cargoType, int? rowSkip, int? rowTake)
         {
-            int customRowSkip = (rowSkip-1) * 8;
+
             var procedureName = "GetOutboundList";
             var parameters = new DynamicParameters();
             parameters.Add("PrincipalId", principalId, DbType.Int64, ParameterDirection.Input);
@@ -46,9 +46,9 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
              commandType: CommandType.StoredProcedure);
 
 
-                if (AcceptedDateFrom != null && AcceptedDateTo != null)
+                if (asOfDate != null)
                 {
-                    outbounds = outbounds.Where(c => c.ActualCheckinDate >= AcceptedDateFrom && c.ActualCheckinDate <= AcceptedDateTo).ToList();
+                    outbounds = outbounds.Where(c => c.ActualCheckinDate <= asOfDate).ToList();
                 }
                 if (principalId != 0)
                 {
@@ -58,17 +58,33 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
                 {
                     outbounds = outbounds.Where(a => a.CargoType == cargoType).ToList();
                 }
-                if (categoryId != 0 && categoryId != null)
+                if (sku != null)
                 {
-                    outbounds = outbounds.Where(a => a.ProductCategoryId == categoryId).ToList();
+                    outbounds = outbounds.Where(a => a.CargoName == sku).ToList();
+                }
+                if (search != null)
+                {
+                    outbounds = outbounds
+                        .Where(item => item.GetType().GetProperties().Any(property =>
+                        {
+                            var value = property.GetValue(item)?.ToString();
+                            return value != null && value == search;
+                        }))
+                        .ToList();
                 }
                 var totalQuantity = outbounds.Select(a => a.Quantity).Sum();
-                var totalVolume = outbounds.Select(a=>a.Volume).Sum();
-
-                return (outbounds.ToList().Skip(customRowSkip).Take(rowTake), outbounds.Count(),totalQuantity,totalVolume);
-
-
+                var totalVolume = outbounds.Select(a => a.Volume).Sum();
+                if (rowSkip != null && rowTake != null)
+                {
+                    int customRowSkip = ((int)rowSkip - 1) * (int)rowTake;
+                    return (outbounds.ToList().Skip(customRowSkip).Take((int)rowTake), outbounds.Count(), totalQuantity, totalVolume);
+                }
+                else
+                {
+                    return (outbounds.ToList(), outbounds.Count(), totalQuantity, totalVolume);
+                }
             }
         }
     }
 }
+

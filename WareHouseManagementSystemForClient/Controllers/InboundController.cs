@@ -14,11 +14,11 @@ namespace WareHouseManagementSystemForClient.Controllers
             _inboundRepository = inboundRepository;
         }
         [HttpPost]
-        public async Task<IActionResult> GetInventoryList(DateTime? AcceptedDateFrom, DateTime? AcceptedDateTo, string? searchRep, int? categoryId, int principalId, int? cargoType, int rowSkip, int rowTake)
+        public async Task<IActionResult> GetInventoryList(DateTime? asOfDate, string? search, string?  sku, int principalId, int? cargoType, int? rowSkip, int? rowTake)
         {
             try
             {
-                var inbounds = await _inboundRepository.GetInboundList(AcceptedDateFrom, AcceptedDateTo, searchRep, categoryId, principalId, cargoType, rowSkip, rowTake);
+                var inbounds = await _inboundRepository.GetInboundList(asOfDate, search, sku, principalId, cargoType, rowSkip, rowTake);
                 return Ok(new { 
                     Inbounds = inbounds.Item1,
                     Count = inbounds.Item2,

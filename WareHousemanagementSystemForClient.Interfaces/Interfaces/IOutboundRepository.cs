@@ -9,7 +9,7 @@ namespace WareHousemanagementSystemForClient.Interfaces.Interfaces
 {
     public interface IOutboundRepository
     {
-        public Task<(IEnumerable<Outbound>, int,double?,double?)> GetOutboundList(DateTime? AcceptedDateFrom, DateTime? AcceptedDateTo, string? searchRep, int? categoryId, int principalId, int? cargoType, int rowSkip, int rowTake);
+        public Task<(IEnumerable<Outbound>, int,double?,double?)> GetOutboundList(DateTime? asOfDate, string? search, string? sku, int principalId, int? cargoType, int? rowSkip, int? rowTake);
         public Task<(IEnumerable<Inbound>, int)> GetAllOutboundByPrincipal(int principalId);
     }
 }
