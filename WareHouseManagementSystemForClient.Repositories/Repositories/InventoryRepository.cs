@@ -33,14 +33,15 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
             {
                 foreach (var inventory in inventories)
                 {
-                    if (inventory.BookingId == inbound.BookingId)
+                    if(inventory.CargoDetailsId == inbound.Id)
                     {
-                        inbound.Volume = inventory.Volume;
                         inbound.DateReleased = inventory.DateReleased;
+                        inbound.Volume = inventory.Volume;
+                        inbound.Balance = inventory.Balance;
                         inbound.InboundQuantity = inventory.InboundQuantity;
                         inbound.OutboundQuantity = inventory.OutboundQuantity;
-                        inbound.Balance = inventory.Balance;
                     }
+                 
                 }
             }
             if (asOfDate != null)

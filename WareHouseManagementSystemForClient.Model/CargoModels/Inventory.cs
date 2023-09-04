@@ -8,6 +8,7 @@ namespace WareHouseManagementSystemForClient.Model.CargoModels
 {
     public class Inventory
     {
+        public int CargoDetailsId { get; set; }
         public int BookingId { get; set; }
         public DateTime? DateReleased { get; set; }
         public double? InboundQuantity { get; set; }
