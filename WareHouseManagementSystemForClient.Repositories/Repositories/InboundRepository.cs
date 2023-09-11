@@ -7,7 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using WareHousemanagementSystemForClient.Interfaces.Interfaces;
 using WareHouseManagementSystemForClient.DbContext.Context;
-using WareHouseManagementSystemForClient.Model.CargoModels;
+using WareHouseManagementSystemForClient.Model.ParamRequestModels;
+using WareHouseManagementSystemForClient.Model.ReportModels;
 
 namespace WareHouseManagementSystemForClient.Repositories.Repositories
 {
@@ -18,74 +19,35 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
         {
             _context = context;
         }
-        public async Task<(IEnumerable<Inbound>, int, double?, double?)> GetInboundList(DateTime? asOfDate, string? search, string? sku, int principalId, int? cargoType, int? rowSkip, int? rowTake)
+        public async Task<(IEnumerable<ReportDataTable>, int, double?)> GetInboundList(ParamRequestForReports paramRequest)
         {
 
             var procedureName = "GetInboundList";
             var parameters = new DynamicParameters();
-            parameters.Add("PrincipalId", principalId, DbType.Int64, ParameterDirection.Input);
+            parameters.Add("PrincipalId", paramRequest.PrincipalId, DbType.Int64, ParameterDirection.Input);
+            parameters.Add("DateFrom", paramRequest.DateFrom, DbType.DateTime, ParameterDirection.Input);
+            parameters.Add("DateTo", paramRequest.DateTo, DbType.DateTime, ParameterDirection.Input);
+            parameters.Add("Sku", paramRequest.Sku, DbType.String, ParameterDirection.Input);
+            parameters.Add("Search", paramRequest.Search, DbType.String, ParameterDirection.Input);
+            parameters.Add("CargoType", paramRequest.CargoType, DbType.Int64, ParameterDirection.Input);
             using (var connection = _context.CreateConnection())
             {
 
-                var inbounds = await connection.QueryAsync<Inbound>(procedureName, parameters, commandTimeout: 120,
+                var inbounds = await connection.QueryAsync<ReportDataTable>(procedureName, parameters, commandTimeout: 120,
        commandType: CommandType.StoredProcedure);
 
-                if (asOfDate != null)
+              
+                var totalQuantity = inbounds.Select(a => a.Qty).Sum();
+                if (paramRequest.RowSkip != null && paramRequest.RowTake != null)
                 {
-                    inbounds = inbounds.Where(c => c.ActualCheckinDate <= asOfDate).ToList();
-                }
-                if (principalId != 0)
-                {
-                    inbounds = inbounds.Where(a => a.PrincipalId == principalId).ToList();
+                    int customRowSkip = ((int)paramRequest.RowSkip - 1) * (int)paramRequest.RowTake;
 
-                }
-                if (cargoType != 3)
-                {
-                    inbounds = inbounds.Where(a => a.CargoType == cargoType).ToList();
-
-                }
-                if (sku != null)
-                {
-                    inbounds = inbounds.Where(a => a.CargoName == sku).ToList();
-                }
-                if (search != null)
-                {
-                    inbounds = inbounds
-                        .Where(item => item.GetType().GetProperties().Any(property =>
-                        {
-                            var value = property.GetValue(item)?.ToString();
-                            return value != null && value == search;
-                        }))
-                        .ToList();
-                }
-                var totalBalance = inbounds.Select(a => a.Balance).Sum();
-                var totalVolume = inbounds.Select(a => a.Volume).Sum();
-                if (rowSkip != null && rowTake != null)
-                {
-                    int customRowSkip = ((int)rowSkip - 1) * (int)rowTake;
-
-                    return (inbounds.ToList().Skip(customRowSkip).Take((int)rowTake), inbounds.Count(), totalBalance, totalVolume);
+                    return (inbounds.ToList().Skip(customRowSkip).Take((int)paramRequest.RowTake), inbounds.Count(), totalQuantity);
                 }
                 else
                 {
-                    return (inbounds.ToList(), inbounds.Count(), totalBalance, totalVolume);
+                    return (inbounds.ToList(), inbounds.Count(), totalQuantity);
                 }
-            }
-        }
-        public async Task<(IEnumerable<Inbound>, int)> GetAllInboundByPrincipal(int principalId)
-        {
-            var procedureName = "GetInboundList";
-            var parameters = new DynamicParameters();
-            parameters.Add("PrincipalId", principalId, DbType.Int64, ParameterDirection.Input);
-            using (var connection = _context.CreateConnection())
-            {
-                var inbounds = await connection.QueryAsync<Inbound>(procedureName, parameters, commandTimeout: 120,
-             commandType: CommandType.StoredProcedure);
-
-
-                return (inbounds.ToList(), inbounds.Count());
-
-
             }
         }
     }

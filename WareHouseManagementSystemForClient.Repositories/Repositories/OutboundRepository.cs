@@ -7,7 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using WareHousemanagementSystemForClient.Interfaces.Interfaces;
 using WareHouseManagementSystemForClient.DbContext.Context;
-using WareHouseManagementSystemForClient.Model.CargoModels;
+using WareHouseManagementSystemForClient.Model.ParamRequestModels;
+using WareHouseManagementSystemForClient.Model.ReportModels;
 
 namespace WareHouseManagementSystemForClient.Repositories.Repositories
 {
@@ -18,70 +19,32 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
         {
             _context = context;
         }
-        public async Task<(IEnumerable<Inbound>, int)> GetAllOutboundByPrincipal(int principalId)
-        {
-            var procedureName = "GetOutboundList";
-            var parameters = new DynamicParameters();
-            parameters.Add("PrincipalId", principalId, DbType.Int64, ParameterDirection.Input);
-            using (var connection = _context.CreateConnection())
-            {
-                var inbounds = await connection.QueryAsync<Inbound>(procedureName, parameters, commandTimeout: 120,
-             commandType: CommandType.StoredProcedure);
 
-                return (inbounds.ToList(), inbounds.Count());
-
-
-            }
-        }
-
-        public async Task<(IEnumerable<Outbound>, int, double?, double?)> GetOutboundList(DateTime? asOfDate, string? search, string? sku, int principalId, int? cargoType, int? rowSkip, int? rowTake)
+        public async Task<(IEnumerable<ReportDataTable>, int, double?)> GetOutboundList(ParamRequestForReports paramRequest)
         {
 
             var procedureName = "GetOutboundList";
             var parameters = new DynamicParameters();
-            parameters.Add("PrincipalId", principalId, DbType.Int64, ParameterDirection.Input);
+            parameters.Add("PrincipalId", paramRequest.PrincipalId, DbType.Int64, ParameterDirection.Input);
+            parameters.Add("DateFrom", paramRequest.DateFrom, DbType.DateTime, ParameterDirection.Input);
+            parameters.Add("DateTo", paramRequest.DateTo, DbType.DateTime, ParameterDirection.Input);
+            parameters.Add("Sku", paramRequest.Sku, DbType.String, ParameterDirection.Input);
+            parameters.Add("Search", paramRequest.Search, DbType.String, ParameterDirection.Input);
+            parameters.Add("CargoType", paramRequest.CargoType, DbType.Int64, ParameterDirection.Input);
             using (var connection = _context.CreateConnection())
             {
-                var outbounds = await connection.QueryAsync<Outbound>(procedureName, parameters, commandTimeout: 120,
+                var outbounds = await connection.QueryAsync<ReportDataTable>(procedureName, parameters, commandTimeout: 120,
              commandType: CommandType.StoredProcedure);
 
-
-                if (asOfDate != null)
+                var totalQuantity = outbounds.Select(a => a.Qty).Sum();
+                if (paramRequest.RowSkip != null && paramRequest.RowSkip != null)
                 {
-                    outbounds = outbounds.Where(c => c.ActualCheckinDate <= asOfDate).ToList();
-                }
-                if (principalId != 0)
-                {
-                    outbounds = outbounds.Where(a => a.PrincipalId == principalId).ToList();
-                }
-                if (cargoType != 3)
-                {
-                    outbounds = outbounds.Where(a => a.CargoType == cargoType).ToList();
-                }
-                if (sku != null)
-                {
-                    outbounds = outbounds.Where(a => a.CargoName == sku).ToList();
-                }
-                if (search != null)
-                {
-                    outbounds = outbounds
-                        .Where(item => item.GetType().GetProperties().Any(property =>
-                        {
-                            var value = property.GetValue(item)?.ToString();
-                            return value != null && value == search;
-                        }))
-                        .ToList();
-                }
-                var totalQuantity = outbounds.Select(a => a.Quantity).Sum();
-                var totalVolume = outbounds.Select(a => a.Volume).Sum();
-                if (rowSkip != null && rowTake != null)
-                {
-                    int customRowSkip = ((int)rowSkip - 1) * (int)rowTake;
-                    return (outbounds.ToList().Skip(customRowSkip).Take((int)rowTake), outbounds.Count(), totalQuantity, totalVolume);
+                    int? customRowSkip = (paramRequest.RowSkip - 1) * paramRequest.RowTake;
+                    return (outbounds.ToList().Skip((int)customRowSkip).Take((int)paramRequest.RowSkip), outbounds.Count(), totalQuantity);
                 }
                 else
                 {
-                    return (outbounds.ToList(), outbounds.Count(), totalQuantity, totalVolume);
+                    return (outbounds.ToList(), outbounds.Count(), totalQuantity);
                 }
             }
         }

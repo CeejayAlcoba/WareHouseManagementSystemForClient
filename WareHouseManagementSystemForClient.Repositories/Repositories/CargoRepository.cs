@@ -7,98 +7,44 @@ using System.Text;
 using System.Threading.Tasks;
 using WareHousemanagementSystemForClient.Interfaces.Interfaces;
 using WareHouseManagementSystemForClient.DbContext.Context;
-using WareHouseManagementSystemForClient.Model.CargoModels;
-using WareHouseManagementSystemForClient.Model.CargoModelsForTable;
+using WareHouseManagementSystemForClient.Model.ParamRequestModels;
+using WareHouseManagementSystemForClient.Model.ReportModels;
 
 namespace WareHouseManagementSystemForClient.Repositories.Repositories
 {
     public class CargoRepository : ICargoRepository
     {
         private readonly DapperContext _context;
-        private readonly IInventoryRepository _inventoryRepository;
-        public CargoRepository(DapperContext context, IInventoryRepository inventoryRepository)
+        public CargoRepository(DapperContext context)
         {
             _context = context;
-            _inventoryRepository = inventoryRepository;
         }
-        public async Task<(IEnumerable<CargoDetailsForTable>, int, double?)> GetAllByPrincipal(int principalId, int? rowSkip, int? rowTake,string? search)
+        public async Task<(IEnumerable<ReportDataTable>, int, double?)> GetAllByPrincipal(ParamRequestForCargos paramRequest)
         {
            
             var procedureName = "GetCargoDetailsByPrincipal";
             var parameters = new DynamicParameters();
-            parameters.Add("Id", principalId, DbType.Int64, ParameterDirection.Input);
+            parameters.Add("PrincipalId", paramRequest.PrincipalId, DbType.Int64, ParameterDirection.Input);
+            parameters.Add("Search", paramRequest.Search, DbType.String, ParameterDirection.Input);
+            parameters.Add("Sku", paramRequest.Sku, DbType.String, ParameterDirection.Input);
             using (var connection = _context.CreateConnection())
             {
-                var multiResult = await connection.QueryMultipleAsync(procedureName, parameters, commandTimeout: 120,
+                var cargos = await connection.QueryAsync<ReportDataTable>(procedureName, parameters, commandTimeout: 120,
              commandType: CommandType.StoredProcedure);
-                var totalCount = await multiResult.ReadSingleOrDefaultAsync<int>();
-                var cargoDetails = await multiResult.ReadAsync<CargoDetailsForTable>();
 
-                if(search != null) {
-                    cargoDetails=cargoDetails.Where(
-                        c=>c.UnitOfMeasurement.ToString() == search ||
-                        c.CargoName == search ||
-                        c.TotalVolume.ToString() == search||
-                        c.TotalQuantity.ToString() == search
-                    );
-                }
+                var totalCount = cargos.Count();
+                var totalQuantity = cargos.Select(a => a.Qty).Sum();
 
-                totalCount = cargoDetails.Count();
-                var totalQuantity = cargoDetails.Select(a => a.TotalQuantity).Sum();
-
-                if (rowSkip!=null && rowTake!=null)
+                if (paramRequest.RowSkip != null && paramRequest.RowTake != null)
                 {
-                    int customRowSkip = ((int)rowSkip - 1) * 8;
-                    cargoDetails = cargoDetails.Skip(customRowSkip).Take((int)rowTake);
+                    int customRowSkip = ((int)paramRequest.RowSkip - 1) * 8;
+                    cargos = cargos.Skip(customRowSkip).Take((int)paramRequest.RowTake);
                 }
                 
-                return (cargoDetails.ToList(), totalCount, totalQuantity);
+                return (cargos.ToList(), totalCount, totalQuantity);
             }
         }
 
-        public async Task<(double,IEnumerable<CargoDetailsForSKURecords>)> GetCargoDetailsSKURecords(int principalId, int? rowSkip, int? rowTake,string? search)
-        {
-
-            var inventories = await _inventoryRepository.GetInventoryList(null, null, null, principalId, null, null, null);
-
-            var inboundsList = inventories.Item1.Select(inventory => new CargoDetailsForSKURecords
-            {
-                CargoName = inventory.CargoName,
-                ICRReferenceNo = inventory.ICRReferenceNo,
-                Balance = inventory.Balance,
-                Uom = inventory.Uom,
-                Volume = inventory.Volume,
-                   DateAccepted = inventory.DateAccepted,
-                ActualCheckinDate = inventory.ActualCheckinDate,
-                ExpirationDate = inventory.ExpirationDate,
-                DeliveryDate = inventory.DeliveryDate,
-            }).OrderBy(c => c.ICRReferenceNo);
-
-            if (search != null)
-            {
-                inboundsList = inboundsList.Where(c =>
-                    c.Balance.ToString() == search ||
-                    c.ICRReferenceNo == search ||
-                    c.CargoName == search ||
-                    c.Volume.ToString() == search ||
-                    c.Uom == search ||
-                    c.DateAccepted.ToString() == search ||
-                    c.ActualCheckinDate.ToString() == search ||
-                    c.ExpirationDate.ToString() == search ||
-                    c.DeliveryDate.ToString() == search 
-                ).OrderBy(c => c.ICRReferenceNo);
-            }
-            if (rowTake != null && rowSkip !=null)
-            {
-                int customRowSkip = ((int)rowSkip - 1) * 8;
-                return (inboundsList.Count(), inboundsList.Skip(customRowSkip).Take((int)rowTake));
-            }
-            else
-            {
-                return (inboundsList.Count(), inboundsList);
-            }
-           
-        }
         public async Task<IEnumerable<string>> GetSKUNamesByPrincipalId(int principalId)
         {
             var procedureName = "GetSKUNamesByPrincipalId";
@@ -108,7 +54,7 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
             {
                 var skus = await connection.QueryAsync<string>(procedureName,parameters, commandTimeout: 120,
              commandType: CommandType.StoredProcedure);
-                return (IEnumerable<string>)skus;
+                return skus;
             }
         }
     }

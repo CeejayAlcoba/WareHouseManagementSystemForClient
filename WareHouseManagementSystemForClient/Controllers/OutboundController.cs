@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WareHousemanagementSystemForClient.Interfaces.Interfaces;
-using WareHouseManagementSystemForClient.Model.CargoModels;
+using WareHouseManagementSystemForClient.Model.ParamRequestModels;
 
 namespace WareHouseManagementSystemForClient.Controllers
 {
@@ -15,16 +15,15 @@ namespace WareHouseManagementSystemForClient.Controllers
             _outboundRepository = outboundRepository;
         }
         [HttpPost]
-        public async Task<IActionResult> GetInventoryList(DateTime? asOfDate, string? search, string? sku, int principalId, int? cargoType, int? rowSkip, int? rowTake)
+        public async Task<IActionResult> GetOutboundList(ParamRequestForReports paramRequest)
         {
             try
             {
-                var outbounds = await _outboundRepository.GetOutboundList(asOfDate, search, sku, principalId, cargoType, rowSkip, rowTake);
+                var outbounds = await _outboundRepository.GetOutboundList(paramRequest);
                 return Ok(new {
                     Outbounds = outbounds.Item1,
                     Count = outbounds.Item2,
-                    TotalQuantity = outbounds.Item3,
-                    TotalVolume = outbounds.Item4
+                    TotalQuantity = outbounds.Item3
                 });
             }
             catch (Exception ex)

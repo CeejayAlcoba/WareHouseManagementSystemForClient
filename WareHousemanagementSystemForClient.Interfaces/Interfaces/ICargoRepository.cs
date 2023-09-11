@@ -3,15 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using WareHouseManagementSystemForClient.Model.CargoModels;
-using WareHouseManagementSystemForClient.Model.CargoModelsForTable;
+using WareHouseManagementSystemForClient.Model.ParamRequestModels;
+using WareHouseManagementSystemForClient.Model.ReportModels;
 
 namespace WareHousemanagementSystemForClient.Interfaces.Interfaces
 {
     public interface ICargoRepository
     {
-        Task<(IEnumerable<CargoDetailsForTable>, int, double?)> GetAllByPrincipal(int principalId, int? rowSkip, int? rowTake,string? search);
-        Task<(double, IEnumerable<CargoDetailsForSKURecords>)> GetCargoDetailsSKURecords(int principalId, int? rowSkip, int? rowTake, string? search);
+        Task<(IEnumerable<ReportDataTable>, int, double?)> GetAllByPrincipal(ParamRequestForCargos paramRequest);
         Task<IEnumerable<string>> GetSKUNamesByPrincipalId(int principalId);
     }
 }
