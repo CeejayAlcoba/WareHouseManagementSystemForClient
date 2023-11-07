@@ -1,11 +1,10 @@
-﻿
-using WareHouseManagementSystemForClient.Model.ParamRequestModels;
-using WareHouseManagementSystemForClient.Model.ReportModels;
+﻿using WareHouseManagementSystemForClient.Model.DTOModels.ReportModels;
+using WareHouseManagementSystemForClient.Model.URLSearchParameterModels;
 
 namespace WareHousemanagementSystemForClient.Interfaces.Interfaces
 {
     public interface IInboundRepository
     {
-        Task<(IEnumerable<ReportDataTable>, int, double?)> GetInboundList(ParamRequestForReports paramRequest);
+        Task<ReportDTO> GetInboundList(ReportsURLSearch urlSearch);
     }
 }

@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using WareHousemanagementSystemForClient.Interfaces.Interfaces;
-using WareHouseManagementSystemForClient.Model.ParamRequestModels;
+using WareHouseManagementSystemForClient.Model.DTOModels.ReportModels;
+using WareHouseManagementSystemForClient.Model.ResponseModels;
+using WareHouseManagementSystemForClient.Model.URLSearchParameterModels;
 
 namespace WareHouseManagementSystemForClient.Controllers
 {
@@ -16,132 +19,111 @@ namespace WareHouseManagementSystemForClient.Controllers
 
         private readonly ICargoRepository _cargoRepository;
         private readonly IInventoryRepository _inventoryRepository;
-        public CargoDetailsController(ICargoRepository cargoRepository, IInventoryRepository inventoryRepository)
+        private readonly IMapper _mapper;
+        public CargoDetailsController(ICargoRepository cargoRepository, IInventoryRepository inventoryRepository, IMapper mapper)
         {
             _cargoRepository = cargoRepository;
             _inventoryRepository = inventoryRepository;
+            _mapper = mapper;
         }
-        [HttpGet("cargo-details-dashboard/{principalId}")]
-        public async Task<IActionResult> GetCargoDetailsDashboard(int principalId)
+        [Route("cargo-totals")]
+        [HttpGet]
+        public async Task<IActionResult> GetCargoDetailsTotals([FromQuery]int principalId)
         {
-            ParamRequestForReports paramRequest = new ParamRequestForReports()
-            {
-                PrincipalId = principalId,
-                DateFrom = null,
-                DateTo = null,
-                Search= "",
-                Sku = "",
-                CargoType = 3,
-                RowSkip=null,
-                RowTake = null,
-            };
+            
 
             try
             {
-                var inventories = await _inventoryRepository.GetInventoryList(paramRequest);
-                return Ok(new
+                var paramMapped = new ReportsURLSearch
                 {
-                    CargoDetails = (new
-                    {
-                        TotalSKU = inventories.Item2,
-                        TotalQuantity = inventories.Item3
-                    })
+                    PrincipalId = principalId
+                };
+
+                var inventories = await _inventoryRepository.GetInventoryList(paramMapped);
+                var totalsMapped = _mapper.Map<ReportTotalsDTO>(inventories);
+
+                return Ok(new OkResponse
+                {
+                    Data = totalsMapped,
+                    Message="Ok",
 
                 });
             }
             catch (Exception ex)
             {
-                return BadRequest(ex);
+                return BadRequest(new BadRequestResponse
+                {
+                    Message = ex.Message,
+
+                });
             }
         }
-        [HttpPost("sku-records")]
-        public async Task<IActionResult> GetSKURecords(ParamRequestForCargos paramRequest)
+
+        [Route("sku-records")]
+        [HttpGet]
+        public async Task<IActionResult> GetSKURecords([FromQuery]CargoURLSearch urlSearch)
         {
-            ParamRequestForReports paramRequestForReports = new ParamRequestForReports()
+            try
             {
-                PrincipalId= paramRequest.PrincipalId,
-                Search = paramRequest.Search,
-                Sku= paramRequest.Sku,
-                RowSkip= paramRequest.RowSkip,
-                RowTake= paramRequest.RowTake,
-                DateFrom=null,
-                DateTo=null,
-            };
-            var skus = await _inventoryRepository.GetInventoryList(paramRequestForReports);
-            return Ok(new
+                var paramMapped = _mapper.Map<ReportsURLSearch>(urlSearch);
+
+                var skus = await _inventoryRepository.GetInventoryList(paramMapped);
+                return Ok(new OkResponse
+                {
+                    Data = skus,
+                });
+            }
+            catch (Exception ex)
             {
-                Data = skus.Item1,
-                TotalCount = skus.Item2,
-                TotalQuantity = skus.Item3
-            });
+                return BadRequest(new BadRequestResponse
+                {
+                    Message = ex.Message
+                });
+            }
+           
         }
 
-        [HttpPost("cargo-details")]
-        public async Task<IActionResult> GetCargoDetails(ParamRequestForCargos paramRequest)
+        [HttpGet]
+        public async Task<IActionResult> GetCargoDetails([FromQuery]CargoURLSearch urlSearch)
         {
          
             try
             {
-                var cargos = await _cargoRepository.GetAllByPrincipal(paramRequest);
-                return Ok(new
+                var paramMapped = _mapper.Map<ReportsURLSearch>(urlSearch);
+                var cargos = await _inventoryRepository.GetInventoryList(paramMapped);
+                return Ok(new OkResponse
                 {
-                    CargoDetails = cargos.Item1,
-                    TotalCount = cargos.Item2,
-                    TotalQuantity = cargos.Item3
+                   Data=cargos,
                 });
             }
             catch (Exception ex)
             {
-                return BadRequest(ex);
-            }
-        }
-
-        [HttpPost("cargo-detail")]
-        public async Task<IActionResult> GetCargoDetail(ParamRequestForCargos paramRequest)
-        {
-            ParamRequestForReports paramRequestForReports = new ParamRequestForReports()
-            {
-                PrincipalId = paramRequest.PrincipalId,
-                DateFrom = null,
-                DateTo = null,
-                Search = paramRequest.Search,
-                Sku = paramRequest.Sku,
-                CargoType = 3,
-                RowSkip = paramRequest.RowSkip,
-                RowTake = paramRequest.RowTake,
-            };
-            try
-            {
-                var cargos = await _inventoryRepository.GetInventoryList(paramRequestForReports);
-                return Ok(new
+                return Ok(new BadRequestResponse
                 {
-                    CargoDetails = cargos.Item1,
-                    TotalCount = cargos.Item2,
-                    TotalQuantity = cargos.Item3
+                    Message = ex.Message
                 });
             }
-            catch (Exception ex)
-            {
-                return BadRequest(ex);
-            }
         }
-        [HttpGet("sku-names/{principalId}")]
-        public async Task<IActionResult> GetSKUNamesByPrincipalId(int principalId)
-        {
-            try
-            {
-                var skus = await _cargoRepository.GetSKUNamesByPrincipalId(principalId);
-
-                return Ok(new
-                {
-                    Skus = skus
-
-                });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex);
-            }
-        }
+        //[Route("item")]
+        //[HttpGet]
+        //public async Task<IActionResult> GetCargoDetail([FromQuery] int cargoId)
+        //{
+        //    var paramMapped = _mapper.Map<ParamRequestForReports>(cargoId);
+        //    try
+        //    {
+        //        var cargos = await _cargoRepository.
+        //        return Ok(new OkResponse
+        //        {
+        //            Data = cargos,
+        //        });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(new BadRequestResponse
+        //        {
+        //            Message = ex.Message
+        //        });
+        //    }
+        //}
     }
 }

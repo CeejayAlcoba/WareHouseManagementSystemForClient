@@ -23,7 +23,10 @@ builder.Services.AddScoped<IPrincipalRepository, PrincipalRepository>();
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 builder.Services.AddScoped<IInboundRepository, InboundRepository>();
 builder.Services.AddScoped<IOutboundRepository, OutboundRepository>();
+builder.Services.AddScoped<IGenericRepository, GenericRepository>();
+builder.Services.AddScoped<IDropdownRepository, DropdownRepository>();
 builder.Services.AddControllers();
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -48,6 +51,7 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod();
         });
 });
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

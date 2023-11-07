@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WareHouseManagementSystemForClient.Model.ParamRequestModels;
-using WareHouseManagementSystemForClient.Model.ReportModels;
+﻿
+using WareHouseManagementSystemForClient.Model.DTOModels.ReportModels;
 
 namespace WareHousemanagementSystemForClient.Interfaces.Interfaces
 {
     public interface ICargoRepository
     {
-        Task<(IEnumerable<ReportDataTable>, int, double?)> GetAllByPrincipal(ParamRequestForCargos paramRequest);
-        Task<IEnumerable<string>> GetSKUNamesByPrincipalId(int principalId);
+        //Task<IEnumerable<Report>> GetCargoDetails(ParamRequestForCargo paramRequest);
+        //Task<IEnumerable<string>> GetSKUDropdownByPrincipalId(int principalId);
     }
 }

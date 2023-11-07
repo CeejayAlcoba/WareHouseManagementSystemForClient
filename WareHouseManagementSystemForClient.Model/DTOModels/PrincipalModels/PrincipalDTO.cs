@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WareHouseManagementSystemForClient.Model.PrincipalModels
+namespace WareHouseManagementSystemForClient.Model.DTOModels.PrincipalModels
 {
-    public class ClientPrincipal
+    public class PrincipalDTO
     {
         public int PrincipalId { get; set; }
-        public string PrincipalName { get; set; }    
+        public string? PrincipalName { get; set; }
     }
 }

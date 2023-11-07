@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WareHouseManagementSystemForClient.Model.ClientModels
+namespace WareHouseManagementSystemForClient.Model.DTOModels.ClientModels
 {
-    public class Client
+    public class ClientDTO
     {
         public int ID { get; set; }
         public string Username { get; set; }

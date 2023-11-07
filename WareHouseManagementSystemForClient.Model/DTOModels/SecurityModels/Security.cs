@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WareHouseManagementSystemForClient.Model.SecurityModels
+namespace WareHouseManagementSystemForClient.Model.DTOModels.SecurityModels
 {
     public class Security
     {

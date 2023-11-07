@@ -1,48 +1,47 @@
-﻿using Dapper;
+﻿using AutoMapper;
+using Dapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
 using System.Data;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using WareHousemanagementSystemForClient.Interfaces.Interfaces;
 using WareHouseManagementSystemForClient.DbContext.Context;
-using WareHouseManagementSystemForClient.Model.ClientModels;
-using WareHouseManagementSystemForClient.Model.SecurityModels;
+using WareHouseManagementSystemForClient.Model.DTOModels.AccountModels;
+using WareHouseManagementSystemForClient.Model.DTOModels.ClientModels;
+using WareHouseManagementSystemForClient.Model.DTOModels.SecurityModels;
 
 namespace WareHouseManagementSystemForClient.Repositories.Repositories
 {
     public class SecurityRepository : ISecurityRepository
     {
-        private readonly DapperContext _context;
         private readonly IConfiguration _configuration;
         private readonly IPrincipalRepository _principalRepository;
-        public SecurityRepository(DapperContext context, IConfiguration configuration, IPrincipalRepository principalRepository)
+        private readonly IGenericRepository _genericRepository;
+        private readonly IMapper _mapper;
+        public SecurityRepository(IConfiguration configuration, IPrincipalRepository principalRepository, IGenericRepository genericRepository, IMapper mapper)
         {
-            _context = context;
+
             _configuration = configuration;
             _principalRepository = principalRepository;
+            _genericRepository = genericRepository;
+            _mapper = mapper;
         }
         public async Task<byte[]> GetClientSaltById(int id)
         {
-            var procedureName = "GetClientSaltById";
+            var procedureName = "CLIENT_GetClientSaltById";
             var parameters = new DynamicParameters();
             parameters.Add("ID", id, DbType.String, ParameterDirection.Input);
-            using (var connection = _context.CreateConnection())
-            {
-                var clientSalt = await connection.QueryFirstOrDefaultAsync<string>
-                   (procedureName, parameters, commandType: CommandType.StoredProcedure);
-                byte[] saltBytes = Convert.FromBase64String(clientSalt);
-                return saltBytes;
-            }
+
+            var clientSalt = await _genericRepository.GetFirstOrDefaultAsync<string>(procedureName, parameters);
+
+            byte[] saltBytes = Convert.FromBase64String(clientSalt);
+            return saltBytes;
         }
-        public Security ToHash(string password,byte[] salt)
+        public Security ToHash(string password, byte[] salt)
         {
             var passwordBytes = new Rfc2898DeriveBytes(password, salt, 10000);
             var passwordHashed = Convert.ToBase64String(passwordBytes.GetBytes(256));
@@ -50,20 +49,25 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
             Security hashSalt = new Security { Hash = passwordHashed, Salt = salt };
             return hashSalt;
         }
-        public async Task<string> GenerateJSONWebToken(Client client)
+        public async Task<string> GenerateJSONWebToken(ClientDTO client)
         {
-            var principals =  await _principalRepository.GetClientPrincipalsByClientId(client.ID);
+            var principals = await _principalRepository.GetClientPrincipalsByClientId(client.ID);
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-            var principalsJson = JsonSerializer.Serialize(principals);
+
+            var account = new AccountDTO
+            {
+                Username = client.Username,
+                Id = client.ID,
+                Firstname = client.Firstname,
+                Lastname = client.Lastname,
+                IsActive = client.IsActive,
+                Principals = principals.ToList(),
+            };
+
             var claims = new[] {
-               new Claim("id",client.ID.ToString()),
-                new Claim("username", client.Username),
-                 new Claim("firstname", client.Firstname),
-                new Claim("lastname", client.Lastname),
-                new Claim("isActive", client.IsActive.ToString()),
-                 new Claim("principals", principalsJson),
-    };
+               new Claim("data", JsonSerializer.Serialize(account))
+            };
 
             var token = new JwtSecurityToken(_configuration["Jwt:Issuer"],
                 _configuration["Jwt:Issuer"],

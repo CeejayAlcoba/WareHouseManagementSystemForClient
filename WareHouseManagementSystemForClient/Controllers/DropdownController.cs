@@ -1,29 +1,30 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿
 using Microsoft.AspNetCore.Mvc;
 using WareHousemanagementSystemForClient.Interfaces.Interfaces;
 using WareHouseManagementSystemForClient.Model.ResponseModels;
-using WareHouseManagementSystemForClient.Model.URLSearchParameterModels;
 
 namespace WareHouseManagementSystemForClient.Controllers
 {
-    [Route("api/outbound")]
+    [Route("api/dropdown")]
     [ApiController]
-    public class OutboundController : ControllerBase
+    public class DropdownController : ControllerBase
     {
-        private readonly IOutboundRepository _outboundRepository;
-        public OutboundController(IOutboundRepository outboundRepository)
+        private readonly IDropdownRepository _dropdownRepository;
+        public DropdownController(IDropdownRepository dropdownRepository)
         {
-            _outboundRepository = outboundRepository;
+            _dropdownRepository = dropdownRepository;
         }
+        [Route("sku")]
         [HttpGet]
-        public async Task<IActionResult> GetOutboundList([FromQuery]ReportsURLSearch urlSearch)
+        public async Task<IActionResult> GetSKUDropdown([FromQuery] int principalId)
         {
             try
             {
-                var outbounds = await _outboundRepository.GetOutboundList(urlSearch);
+                var skus = await _dropdownRepository.GetSKUDropdown(principalId);
+
                 return Ok(new OkResponse
                 {
-                    Data = outbounds
+                    Data = skus,
                 });
             }
             catch (Exception ex)
@@ -33,7 +34,6 @@ namespace WareHouseManagementSystemForClient.Controllers
                     Message = ex.Message
                 });
             }
-
         }
     }
 }

@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using WareHouseManagementSystemForClient.Model.PrincipalModels;
+using WareHouseManagementSystemForClient.Model.DTOModels.PrincipalModels;
 
 namespace WareHousemanagementSystemForClient.Interfaces.Interfaces
 {
     public interface IPrincipalRepository
     {
-        Task<IEnumerable<ClientPrincipal>> GetClientPrincipalsByClientId(int clienId);
+        Task<IEnumerable<PrincipalDTO>> GetClientPrincipalsByClientId(int clienId);
     }
 }

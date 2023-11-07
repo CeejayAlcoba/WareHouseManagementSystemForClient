@@ -4,14 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WareHouseManagementSystemForClient.Model.MenuItemModels
+namespace WareHouseManagementSystemForClient.Model.DTOModels.MenuItemsModel
 {
-    public class MenuItem
+    public class MenuItemDTO
     {
         public int MenuItemId { get; set; }
         public string DirectoryPath { get; set; }
         public string Name { get; set; }
-        public string Icon{ get; set; }
+        public string Icon { get; set; }
         public int ParentId { get; set; }
     }
 }

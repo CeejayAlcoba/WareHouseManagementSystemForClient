@@ -7,30 +7,26 @@ using System.Text;
 using System.Threading.Tasks;
 using WareHousemanagementSystemForClient.Interfaces.Interfaces;
 using WareHouseManagementSystemForClient.DbContext.Context;
-using WareHouseManagementSystemForClient.Model.ClientModels;
-using WareHouseManagementSystemForClient.Model.SecurityModels;
+using WareHouseManagementSystemForClient.Model.DTOModels.ClientModels;
 
 namespace WareHouseManagementSystemForClient.Repositories.Repositories
 {
     public class ClientRepository : IClientRepository
     {
-        private readonly DapperContext _context;
-        public ClientRepository(DapperContext context)
+        private readonly IGenericRepository _genericRepository;
+        public ClientRepository(IGenericRepository genericRepository)
         {
-            _context = context;
+            _genericRepository = genericRepository;
         }
-        public async Task<Client> GetClientByUsername(string username)
+        public async Task<ClientDTO> GetClientByUsername(string username)
         {
-            var procedureName = "GetClientByUsername";
+            var procedureName = "CLIENT_GetClientByUsername";
             var parameters = new DynamicParameters();
             parameters.Add("Username", username, DbType.String, ParameterDirection.Input);
-            using (var connection = _context.CreateConnection())
-            {
-                var client = await connection.QueryFirstOrDefaultAsync<Client>
-                   (procedureName, parameters, commandType: CommandType.StoredProcedure);
+           
+            var client = await _genericRepository.GetFirstOrDefaultAsync<ClientDTO>(procedureName, parameters);
 
-                return client;
-            }
+            return client;
         }
     }
 }

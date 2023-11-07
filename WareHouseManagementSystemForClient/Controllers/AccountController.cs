@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WareHousemanagementSystemForClient.Interfaces.Interfaces;
-using WareHouseManagementSystemForClient.Model.SecurityModels;
+using WareHouseManagementSystemForClient.Model.DTOModels.SecurityModels;
+using WareHouseManagementSystemForClient.Model.ResponseModels;
 
 namespace WareHouseManagementSystemForClient.Controllers
 {
@@ -11,30 +12,39 @@ namespace WareHouseManagementSystemForClient.Controllers
     {
         private readonly IAccountRepository _accountRepo;
         private readonly ISecurityRepository _securityRepo;
-        public AccountController(IAccountRepository accountRepo,ISecurityRepository securityRepository)
+        public AccountController(IAccountRepository accountRepo, ISecurityRepository securityRepository)
         {
             _accountRepo = accountRepo;
             _securityRepo = securityRepository;
         }
         [HttpPost("login")]
-        public async Task<IActionResult> ClientLogin([FromBody]LoginCredential credential)
+        public async Task<IActionResult> ClientLogin([FromBody] LoginCredential credential)
         {
             try
             {
-               var client = await _accountRepo.ClientLogin(credential);
-               if(client != null)
+                var client = await _accountRepo.ClientLogin(credential);
+                if (client != null)
                 {
                     var token = await _securityRepo.GenerateJSONWebToken(client);
-                    return Ok(token);
+                    return Ok(new OkResponse
+                    {
+                        Data = token
+                    });
                 }
                 else
                 {
-                    return BadRequest("Invalid username and password");
+                    return BadRequest(new BadRequestResponse
+                    {
+                        Message = "Invalid username and password"
+                    });
                 }
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new BadRequestResponse
+                {
+                    Message = ex.Message
+                });
             }
         }
     }

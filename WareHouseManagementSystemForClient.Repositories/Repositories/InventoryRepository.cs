@@ -1,57 +1,41 @@
-﻿using Dapper;
-using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using AutoMapper;
+using Dapper;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
 using WareHousemanagementSystemForClient.Interfaces.Interfaces;
-using WareHouseManagementSystemForClient.DbContext.Context;
-using WareHouseManagementSystemForClient.Model.ParamRequestModels;
-using WareHouseManagementSystemForClient.Model.ReportModels;
+using WareHouseManagementSystemForClient.Model.DTOModels.ReportModels;
+using WareHouseManagementSystemForClient.Model.URLSearchParameterModels;
 
 namespace WareHouseManagementSystemForClient.Repositories.Repositories
 {
     public class InventoryRepository : IInventoryRepository
     {
-        private readonly DapperContext _context;
-        public InventoryRepository(DapperContext context)
+        private readonly IGenericRepository _genericRepository;
+        private readonly IMapper _mapper;
+        public InventoryRepository(IGenericRepository genericRepository, IMapper mapper)
         {
-            _context = context;
+            _genericRepository = genericRepository;
+            _mapper = mapper;
         }
-        public async Task<(IEnumerable<ReportDataTable>, int, double?)> GetInventoryList(ParamRequestForReports paramRequest)
+        public async Task<ReportDTO> GetInventoryList(ReportsURLSearch urlSearch)
         {
 
-            var procedureName = "GetInventoryList";
+            var procedureName = "CLIENT_GetInventoryList";
             var parameters = new DynamicParameters();
-            parameters.Add("PrincipalId", paramRequest.PrincipalId, DbType.Int64, ParameterDirection.Input);
-            parameters.Add("DateFrom", paramRequest.DateFrom, DbType.DateTime, ParameterDirection.Input);
-            parameters.Add("DateTo", paramRequest.DateTo, DbType.DateTime, ParameterDirection.Input);
-            parameters.Add("Sku", paramRequest.Sku, DbType.String, ParameterDirection.Input);
-            parameters.Add("Search", paramRequest.Search, DbType.String, ParameterDirection.Input);
-            parameters.Add("CargoType", paramRequest.CargoType, DbType.Int64, ParameterDirection.Input);
-            using (var connection = _context.CreateConnection())
-            {
+            parameters.Add("CargoId", urlSearch.CargoId, DbType.Int64, ParameterDirection.Input);
+            parameters.Add("PrincipalId", urlSearch.PrincipalId, DbType.Int64, ParameterDirection.Input);
+            parameters.Add("DateFrom", urlSearch.DateFrom, DbType.DateTime, ParameterDirection.Input);
+            parameters.Add("DateTo", urlSearch.DateTo, DbType.DateTime, ParameterDirection.Input);
+            parameters.Add("Sku", urlSearch.Sku, DbType.String, ParameterDirection.Input);
+            parameters.Add("Search", urlSearch.Search, DbType.String, ParameterDirection.Input);
+            parameters.Add("CargoType", urlSearch.CargoType, DbType.Int64, ParameterDirection.Input);
+            parameters.Add("@RowTake", urlSearch.RowTake, DbType.String, ParameterDirection.Input);
+            parameters.Add("@PageNumber", urlSearch.PageNumber, DbType.Int64, ParameterDirection.Input);
 
-                var inventories = await connection.QueryAsync<ReportDataTable>(procedureName, parameters, commandTimeout: 120,
-       commandType: CommandType.StoredProcedure);
+            var inventories = await _genericRepository.GetAllAsync<Report>(procedureName, parameters);
 
+            var reportData = _mapper.Map<IEnumerable<Report>, ReportDTO>(inventories.ToList());
 
-                var totalQuantity = inventories.Select(a => a.Qty).Sum();
-                if (paramRequest.RowSkip != null && paramRequest.RowTake != null)
-                {
-                    int customRowSkip = ((int)paramRequest.RowSkip - 1) * (int)paramRequest.RowTake;
-
-                    return (inventories.ToList().Skip(customRowSkip).Take((int)paramRequest.RowTake), inventories.Count(), totalQuantity);
-                }
-                else
-                {
-                    return (inventories.ToList(), inventories.Count(), totalQuantity);
-                }
-            }
-
+            return reportData;
         }
     }
 }

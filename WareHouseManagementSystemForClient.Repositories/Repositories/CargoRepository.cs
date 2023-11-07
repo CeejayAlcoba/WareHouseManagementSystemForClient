@@ -1,61 +1,45 @@
-﻿using Dapper;
-using System;
-using System.Collections.Generic;
+﻿using AutoMapper;
+using Dapper;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WareHousemanagementSystemForClient.Interfaces.Interfaces;
-using WareHouseManagementSystemForClient.DbContext.Context;
-using WareHouseManagementSystemForClient.Model.ParamRequestModels;
-using WareHouseManagementSystemForClient.Model.ReportModels;
 
 namespace WareHouseManagementSystemForClient.Repositories.Repositories
 {
     public class CargoRepository : ICargoRepository
     {
-        private readonly DapperContext _context;
-        public CargoRepository(DapperContext context)
+        private readonly IGenericRepository _genericRepository;
+        private readonly IMapper _mapper;
+        public CargoRepository(IGenericRepository genericRepository,IMapper mapper)
         {
-            _context = context;
+            _genericRepository = genericRepository;
+            _mapper = mapper;
         }
-        public async Task<(IEnumerable<ReportDataTable>, int, double?)> GetAllByPrincipal(ParamRequestForCargos paramRequest)
-        {
+        //public async Task<IEnumerable<Report>> GetCargoDetails(ParamRequestForCargo paramRequest)
+        //{
            
-            var procedureName = "GetCargoDetailsByPrincipal";
-            var parameters = new DynamicParameters();
-            parameters.Add("PrincipalId", paramRequest.PrincipalId, DbType.Int64, ParameterDirection.Input);
-            parameters.Add("Search", paramRequest.Search, DbType.String, ParameterDirection.Input);
-            parameters.Add("Sku", paramRequest.Sku, DbType.String, ParameterDirection.Input);
-            using (var connection = _context.CreateConnection())
-            {
-                var cargos = await connection.QueryAsync<ReportDataTable>(procedureName, parameters, commandTimeout: 120,
-             commandType: CommandType.StoredProcedure);
+        //    var procedureName = "CLIENT_GetCargoDetailsByPrincipal";
+        //    var parameters = new DynamicParameters();
+        //    parameters.Add("PrincipalId", paramRequest.PrincipalId, DbType.Int64, ParameterDirection.Input);
+        //    parameters.Add("Search", paramRequest.Search, DbType.String, ParameterDirection.Input);
+        //    parameters.Add("Sku", paramRequest.Sku, DbType.String, ParameterDirection.Input);
 
-                var totalCount = cargos.Count();
-                var totalQuantity = cargos.Select(a => a.Qty).Sum();
+        //    var cargos = await _genericRepository.GetAllAsync<Report>(procedureName, parameters);
 
-                if (paramRequest.RowSkip != null && paramRequest.RowTake != null)
-                {
-                    int customRowSkip = ((int)paramRequest.RowSkip - 1) * 8;
-                    cargos = cargos.Skip(customRowSkip).Take((int)paramRequest.RowTake);
-                }
-                
-                return (cargos.ToList(), totalCount, totalQuantity);
-            }
-        }
 
-        public async Task<IEnumerable<string>> GetSKUNamesByPrincipalId(int principalId)
-        {
-            var procedureName = "GetSKUNamesByPrincipalId";
-            var parameters = new DynamicParameters();
-            parameters.Add("PrincipalId", principalId, DbType.Int64, ParameterDirection.Input);
-            using (var connection = _context.CreateConnection())
-            {
-                var skus = await connection.QueryAsync<string>(procedureName,parameters, commandTimeout: 120,
-             commandType: CommandType.StoredProcedure);
-                return skus;
-            }
-        }
+
+        //    var test= _mapper.Map<IEnumerable<ReportItem>>(cargos);
+        //    return cargos;
+        //}
+
+        //public async Task<IEnumerable<string>> GetSKUDropdownByPrincipalId(int principalId)
+        //{
+        //    var procedureName = "CLIENT_GetSKUNamesByPrincipalId";
+        //    var parameters = new DynamicParameters();
+        //    parameters.Add("PrincipalId", principalId, DbType.Int64, ParameterDirection.Input);
+           
+        //    var skus = await _genericRepository.GetAllAsync<string>(procedureName, parameters);
+
+        //    return skus;
+        //}
     }
 }

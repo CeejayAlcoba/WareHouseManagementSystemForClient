@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WareHousemanagementSystemForClient.Interfaces.Interfaces;
-using WareHouseManagementSystemForClient.Model.ParamRequestModels;
+using WareHouseManagementSystemForClient.Model.ResponseModels;
+using WareHouseManagementSystemForClient.Model.URLSearchParameterModels;
 
 namespace WareHouseManagementSystemForClient.Controllers
 {
@@ -14,21 +15,23 @@ namespace WareHouseManagementSystemForClient.Controllers
         {
             _inboundRepository = inboundRepository;
         }
-        [HttpPost]
-        public async Task<IActionResult> GetInventoryList(ParamRequestForReports paramRequest)
+        [HttpGet]
+        public async Task<IActionResult> GetInventoryList([FromQuery]ReportsURLSearch urlSearch)
         {
             try
             {
-                var inbounds = await _inboundRepository.GetInboundList(paramRequest);
-                return Ok(new { 
-                    Inbounds = inbounds.Item1,
-                    Count = inbounds.Item2,
-                    TotalQuantity = inbounds.Item3,
+                var inbounds = await _inboundRepository.GetInboundList(urlSearch);
+                return Ok(new OkResponse
+                { 
+                   Data = inbounds,
                 });
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new BadRequestResponse
+                {
+                    Message=ex.Message,
+                });
             }
 
         }

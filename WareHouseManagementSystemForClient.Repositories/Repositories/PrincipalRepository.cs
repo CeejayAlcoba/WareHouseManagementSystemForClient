@@ -1,13 +1,8 @@
 ﻿using Dapper;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WareHousemanagementSystemForClient.Interfaces.Interfaces;
 using WareHouseManagementSystemForClient.DbContext.Context;
-using WareHouseManagementSystemForClient.Model.PrincipalModels;
+using WareHouseManagementSystemForClient.Model.DTOModels.PrincipalModels;
 
 namespace WareHouseManagementSystemForClient.Repositories.Repositories
 {
@@ -18,14 +13,14 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
         {
             _context = context;
         }
-        public async Task<IEnumerable<ClientPrincipal>> GetClientPrincipalsByClientId(int clienId)
+        public async Task<IEnumerable<PrincipalDTO>> GetClientPrincipalsByClientId(int clienId)
         {
-            var procedureName = "GetClientPrincipalsByClientId";
+            var procedureName = "CLIENT_GetClientPrincipalsByClientId";
             var parameters = new DynamicParameters();
             parameters.Add("ClientId", clienId, DbType.Int64, ParameterDirection.Input);
             using (var connection = _context.CreateConnection())
             {
-                var principals = await connection.QueryAsync<ClientPrincipal>
+                var principals = await connection.QueryAsync<PrincipalDTO>
                    (procedureName, parameters, commandType: CommandType.StoredProcedure);
 
                 return principals.ToList();

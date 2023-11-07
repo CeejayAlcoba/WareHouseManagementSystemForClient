@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using WareHousemanagementSystemForClient.Interfaces.Interfaces;
+using WareHouseManagementSystemForClient.Model.ResponseModels;
 
 namespace WareHouseManagementSystemForClient.Controllers
 {
@@ -19,11 +19,17 @@ namespace WareHouseManagementSystemForClient.Controllers
             try
             {
                 var menuItems = await _menuItemRepository.GetMenuItems();
-                return Ok(menuItems);
+                return Ok(new OkResponse
+                {
+                    Data = menuItems
+                });
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new BadRequestResponse
+                {
+                    Message = ex.Message
+                });
             }
         }
     }

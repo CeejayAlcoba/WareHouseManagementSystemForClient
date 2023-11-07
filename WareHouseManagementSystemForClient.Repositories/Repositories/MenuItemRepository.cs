@@ -1,33 +1,26 @@
 ﻿using Dapper;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WareHousemanagementSystemForClient.Interfaces.Interfaces;
 using WareHouseManagementSystemForClient.DbContext.Context;
-using WareHouseManagementSystemForClient.Model.MenuItemModels;
+using WareHouseManagementSystemForClient.Model.DTOModels.MenuItemsModel;
 
 namespace WareHouseManagementSystemForClient.Repositories.Repositories
 {
     public class MenuItemRepository : IMenuItemRepository
     {
-        private readonly DapperContext _context;
-        public MenuItemRepository(DapperContext context)
+        private readonly IGenericRepository _genericRepository;
+        public MenuItemRepository(IGenericRepository genericRepository)
         {
-            _context = context;
+            _genericRepository = genericRepository;
         }
-        public async Task<IEnumerable<MenuItem>> GetMenuItems()
+        public async Task<IEnumerable<MenuItemDTO>> GetMenuItems()
         {
-            var procedureName = "GetMenuItems";
-            using (var connection = _context.CreateConnection())
-            {
-                var menuItems = await connection.QueryAsync<MenuItem>
-                   (procedureName,commandType: CommandType.StoredProcedure);
+            var procedureName = "CLIENT_GetMenuItems";
 
-                return menuItems.ToList();
-            }
+            var menuItems = await _genericRepository.GetAllAsync<MenuItemDTO>(procedureName,null);
+
+            return menuItems;
+           
         }
     }
 }
