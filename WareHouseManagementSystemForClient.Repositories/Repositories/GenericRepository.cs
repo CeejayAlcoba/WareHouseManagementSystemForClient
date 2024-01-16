@@ -34,7 +34,7 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
             using (var connection = _context.CreateConnection())
             {
                 var result = await connection.QueryFirstOrDefaultAsync<T>
-                   (procedureName, parameters, commandType: CommandType.StoredProcedure);
+                   (procedureName, parameters, commandType: CommandType.StoredProcedure, commandTimeout: 120);
 
                 return result;
             }

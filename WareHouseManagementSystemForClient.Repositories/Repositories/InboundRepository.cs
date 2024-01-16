@@ -19,7 +19,7 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
         }
         public async Task<ReportDTO> GetInboundList(ReportsURLSearch urlSearch)
         {
-            var procedureName = "CLIENT_GetInboundList";
+            var procedureName = "WMS_GetInboundList";
             var parameters = new DynamicParameters();
             parameters.Add("CargoId", urlSearch.CargoId, DbType.Int64, ParameterDirection.Input);
             parameters.Add("PrincipalId", urlSearch.PrincipalId, DbType.Int64, ParameterDirection.Input);
@@ -28,8 +28,8 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
             parameters.Add("Sku", urlSearch.Sku, DbType.String, ParameterDirection.Input);
             parameters.Add("Search", urlSearch.Search, DbType.String, ParameterDirection.Input);
             parameters.Add("CargoType", urlSearch.CargoType, DbType.Int64, ParameterDirection.Input);
-            parameters.Add("@RowTake", urlSearch.RowTake, DbType.String, ParameterDirection.Input);
-            parameters.Add("@PageNumber", urlSearch.PageNumber, DbType.Int64, ParameterDirection.Input);
+            parameters.Add("RowTake", urlSearch.RowTake, DbType.String, ParameterDirection.Input);
+            parameters.Add("PageNumber", urlSearch.PageNumber, DbType.Int64, ParameterDirection.Input);
 
             var inbounds = await _genericRepository.GetAllAsync<Report>(procedureName, parameters);
 

@@ -27,7 +27,7 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
         public async Task<ReportDTO> GetOutboundList(ReportsURLSearch urlSearch)
         {
 
-            var procedureName = "CLIENT_GetOutboundList";
+            var procedureName = "WMS_GetOutboundList";
             var parameters = new DynamicParameters();
             parameters.Add("PrincipalId", urlSearch.PrincipalId, DbType.Int64, ParameterDirection.Input);
             parameters.Add("DateFrom", urlSearch.DateFrom, DbType.DateTime, ParameterDirection.Input);
@@ -35,8 +35,8 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
             parameters.Add("Sku", urlSearch.Sku, DbType.String, ParameterDirection.Input);
             parameters.Add("Search", urlSearch.Search, DbType.String, ParameterDirection.Input);
             parameters.Add("CargoType", urlSearch.CargoType, DbType.Int64, ParameterDirection.Input);
-            parameters.Add("@RowTake", urlSearch.RowTake, DbType.String, ParameterDirection.Input);
-            parameters.Add("@PageNumber", urlSearch.PageNumber, DbType.Int64, ParameterDirection.Input);
+            parameters.Add("RowTake", urlSearch.RowTake, DbType.String, ParameterDirection.Input);
+            parameters.Add("PageNumber", urlSearch.PageNumber, DbType.Int64, ParameterDirection.Input);
 
             var outbounds = await _genericRepository.GetAllAsync<Report>(procedureName, parameters);
 
