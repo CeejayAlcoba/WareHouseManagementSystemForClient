@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Dapper;
+using Microsoft.Identity.Client.Extensions.Msal;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -31,7 +32,7 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
 
             string procedureName = "WMS_GetHandlingIn";
 
-             var parameters = new DynamicParameters();
+            var parameters = new DynamicParameters();
             parameters.Add("DateFrom", billing.DateFrom, DbType.String, ParameterDirection.Input);
             parameters.Add("DateTo", billing.DateTo, DbType.String, ParameterDirection.Input);
             parameters.Add("CargoType", billing.CargoType, DbType.String, ParameterDirection.Input);
@@ -75,14 +76,14 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
             parameters.Add("PageNumber", 1, DbType.Int64, ParameterDirection.Input);
 
             var beginningBalance = await _genericRepository.GetFirstOrDefaultAsync<BeginningBalance>(procedureName, parameters);
-            if (beginningBalance != null) beginningBalance.BillingDate = endDate; 
+            if (beginningBalance != null) beginningBalance.BillingDate = endDate;
 
             return beginningBalance;
         }
 
         public async Task<List<StorageBill>> GetStorageBill(BillingURLSearch billing, BillingDTO handlingIn, BillingDTO handlingOut)
         {
-            
+
             var beginningReport = await BeginningBalance(billing);
             if (beginningReport == null) return new List<StorageBill>();
 
@@ -95,47 +96,22 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
                 handlingOut = await GetHandlingOut(billing);
             }
 
-                //--COMBINED REPORTS--//
+         
             List<StorageBill> combinedReports = new List<StorageBill>();
-
-            //--MAPPING AND ADD THE HANDLING IN--//
-            foreach (var item in handlingIn.BillingItems) 
-            {
-                var mapped = new StorageBill()
-                {
-                    BillingDate = item.BillingDate,
-                    Quantity = item.Quantity,
-                    Volume = item.Volume,
-                    HIVolume = item.Volume,
-                    HIQuantity = item.Quantity,
-                };
-                combinedReports.Add(mapped);
-            }
-
-            //--MAPPING AND ADD THE HANDLING OUT--//
-            foreach (var item in handlingOut.BillingItems) 
-            {
-                var mapped = new StorageBill()
-                {
-                    BillingDate = item.BillingDate,
-                    Quantity = item.Quantity,
-                    Volume = item.Volume,
-                    HOVolume = item.Volume,
-                    HOQuantity = item.Quantity,
-                };
-                combinedReports.Add(mapped);
-            }
-
-            //--MAPPING AND ADD THE BEGINNING BALANCE--//
-            var beginningReportMapped = new StorageBill() 
+            var beginningReportMapped = new StorageBill()    //--MAPPING AND ADD THE BEGINNING BALANCE--//
             {
                 BillingDate = beginningReport.BillingDate,
-                //CutOff = beginningReport.CutOff,
                 Quantity = beginningReport.TotalQuantity,
                 Volume = beginningReport.TotalVolume,
             };
-
             combinedReports.Add(beginningReportMapped);
+
+            var handlingInGrouped = HandlingInToGroup(handlingIn.BillingItems);
+
+            var handlingOutGrouped = HandlingOutToGroup(handlingOut.BillingItems);
+            ReportToCombined(combinedReports, handlingInGrouped); //--COMBINED REPORTS--//       
+            ReportToCombined(combinedReports, handlingOutGrouped); //--COMBINED REPORTS--//
+
             combinedReports = combinedReports.OrderBy(c => c.BillingDate).ToList();
 
             double? initialQuantity = beginningReport.TotalQuantity;
@@ -143,8 +119,7 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
 
             List<StorageBill> storageReports = new List<StorageBill>();
 
-            //--CALCULATE THE SYNC QUANTITY AND VOLUME--//
-            for (int a = 0; a < combinedReports.Count(); a++)
+            for (int a = 0; a < combinedReports.Count(); a++)  //--CALCULATE THE SYNC QUANTITY AND VOLUME--//
             {
                 var cutOffDate = a < combinedReports.Count() - 1 ? combinedReports[a + 1]?.BillingDate : billing.DateTo;
                 int NoOfDays = (cutOffDate.Value.Date - combinedReports[a].BillingDate.Value.Date).Days;
@@ -179,6 +154,50 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
 
             return storageReports;
         }
-        
+        public IEnumerable<StorageBill> HandlingInToGroup(IEnumerable<BillingItem> billingItems)
+        {
+            return billingItems
+                            .GroupBy(c => c.BillingDate)
+                            .Select(group => new StorageBill
+                            {
+                                BillingDate = group.Key,
+                                Quantity = group.Sum(item => item.Quantity),
+                                Volume = group.Sum(item => item.Volume),
+                                HIQuantity = group.Sum(item => item.Quantity),
+                                HIVolume = group.Sum(item => item.Volume)
+                            }).ToList();
+        }
+        public IEnumerable<StorageBill> HandlingOutToGroup(IEnumerable<BillingItem> billingItems)
+        {
+           return billingItems
+                            .GroupBy(c => c.BillingDate)
+                            .Select(group => new StorageBill
+                            {
+                                BillingDate = group.Key,
+                                Quantity = group.Sum(item => item.Quantity),
+                                Volume = group.Sum(item => item.Volume),
+                                HOQuantity = group.Sum(item => item.Quantity),
+                                HOVolume = group.Sum(item => item.Volume)
+                            }).ToList();
+        }
+        public void ReportToCombined(List<StorageBill> combinedReports, IEnumerable<StorageBill> billingItems )
+        {
+            foreach (var item in billingItems)
+            {
+                var mapped = new StorageBill()
+                {
+                    BillingDate = item.BillingDate,
+                    Quantity = item.Quantity,
+                    Volume = item.Volume,
+                    HOVolume = item.HOVolume,
+                    HOQuantity = item.HOQuantity,
+                    HIVolume = item.HIVolume,
+                    HIQuantity = item.HIQuantity,
+                };
+
+                combinedReports.Add(mapped);
+            }
+        }
     }
+
 }
