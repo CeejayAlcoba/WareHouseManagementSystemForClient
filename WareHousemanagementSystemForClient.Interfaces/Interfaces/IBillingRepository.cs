@@ -14,5 +14,6 @@ namespace WareHousemanagementSystemForClient.Interfaces.Interfaces
         Task<BillingDTO> GetHandlingOut(BillingURLSearch billing);
         Task<List<StorageBill>> GetStorageBill(BillingURLSearch billing, BillingDTO handlingIn, BillingDTO handlingOut);
         Task<double> GetVatbyPrincipal(int? principal);
+        Task<BillingDetails> GetBillingDetailByPrincipal(int principalId);
     }
 }

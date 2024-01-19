@@ -31,7 +31,7 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
             string procedureName = "WMS_InventoryList";
             var parameters = new DynamicParameters();
             parameters.Add("PrincipalId", principalId, DbType.Int64, ParameterDirection.Input);
-            parameters.Add("RowTake",1, DbType.Int64, ParameterDirection.Input);
+            parameters.Add("RowTake", 1, DbType.Int64, ParameterDirection.Input);
             parameters.Add("PageNumber", 1, DbType.Int64, ParameterDirection.Input);
 
             var inventories = await _genericRepository.GetAllAsync<Report>(procedureName, parameters);
@@ -75,7 +75,7 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
 
         public async Task<BeginningBalance> BeginningBalance(BillingURLSearch billing)
         {
-         
+
             var procedureName = "WMS_InventoryList";
             DateTime? endDate = billing.DateFrom.Value.AddDays(-1);
             DateTime? beginningDate = new DateTime(1753, 1, 1);
@@ -89,7 +89,22 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
             parameters.Add("@IsAllowZero", false, DbType.Boolean);
 
             var beginningBalance = await _genericRepository.GetFirstOrDefaultAsync<BeginningBalance>(procedureName, parameters);
-            if (beginningBalance != null) beginningBalance.BillingDate = endDate;
+            if (beginningBalance == null)
+            {
+                var billingDetail = await GetBillingDetailByPrincipal((int)billing.PrincipalId);
+                beginningBalance = new BeginningBalance
+                {
+                    TotalQuantity = 0,
+                    TotalVolume = 0,
+                    StorageBill = billingDetail.Storage,
+                    BillingDate = endDate
+                };
+            }
+            else
+            {
+                beginningBalance.BillingDate = endDate;
+            }
+           
 
             return beginningBalance;
         }
@@ -110,7 +125,7 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
                 handlingOut = await GetHandlingOut(billing);
             }
 
-         
+
             List<StorageBill> combinedReports = new List<StorageBill>();
             var beginningReportMapped = new StorageBill()    //--MAPPING AND ADD THE BEGINNING BALANCE--//
             {
@@ -149,7 +164,7 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
                     initialQuantity = initialQuantity - item.Quantity;
                     initialVolume = initialVolume - item.Volume;
                 }
-                var totalCharge = beginningReport.StorageBill * initialVolume * NoOfDays ;
+                var totalCharge = beginningReport.StorageBill * initialVolume * NoOfDays;
 
                 var reportMapped = new StorageBill() //---MAPPING--//
                 {
@@ -163,13 +178,20 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
                     HIVolume = item.HIVolume,
                     HOVolume = item.HOVolume,
                     StorageCharge = Math.Round((double)totalCharge, 2)
-            };
+                };
                 storageReports.Add(reportMapped);
             };
 
             return storageReports;
         }
-        public IEnumerable<StorageBill> HandlingInToGroup(IEnumerable<BillingItem> billingItems)
+        public async Task<BillingDetails> GetBillingDetailByPrincipal(int principalId)
+        {
+            string procedureName = "WMS_GetBillingDetailByPrincipal";
+            DynamicParameters parameters = new DynamicParameters();
+            parameters.Add("@PrincipalId", principalId, DbType.Int64);
+            return await _genericRepository.GetFirstOrDefaultAsync<BillingDetails>(procedureName, parameters);
+        }
+         IEnumerable<StorageBill> HandlingInToGroup(IEnumerable<BillingItem> billingItems)
         {
             return billingItems
                             .GroupBy(c => c.BillingDate)
@@ -182,20 +204,20 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
                                 HIVolume = group.Sum(item => item.Volume)
                             }).ToList();
         }
-        public IEnumerable<StorageBill> HandlingOutToGroup(IEnumerable<BillingItem> billingItems)
+         IEnumerable<StorageBill> HandlingOutToGroup(IEnumerable<BillingItem> billingItems)
         {
-           return billingItems
-                            .GroupBy(c => c.BillingDate)
-                            .Select(group => new StorageBill
-                            {
-                                BillingDate = group.Key,
-                                Quantity = group.Sum(item => item.Quantity),
-                                Volume = group.Sum(item => item.Volume),
-                                HOQuantity = group.Sum(item => item.Quantity),
-                                HOVolume = group.Sum(item => item.Volume)
-                            }).ToList();
+            return billingItems
+                             .GroupBy(c => c.BillingDate)
+                             .Select(group => new StorageBill
+                             {
+                                 BillingDate = group.Key,
+                                 Quantity = group.Sum(item => item.Quantity),
+                                 Volume = group.Sum(item => item.Volume),
+                                 HOQuantity = group.Sum(item => item.Quantity),
+                                 HOVolume = group.Sum(item => item.Volume)
+                             }).ToList();
         }
-        public void ReportToCombined(List<StorageBill> combinedReports, IEnumerable<StorageBill> billingItems )
+         void ReportToCombined(List<StorageBill> combinedReports, IEnumerable<StorageBill> billingItems)
         {
             foreach (var item in billingItems)
             {
@@ -213,6 +235,8 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
                 combinedReports.Add(mapped);
             }
         }
+
+        
     }
 
 }
