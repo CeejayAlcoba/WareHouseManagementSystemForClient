@@ -26,12 +26,24 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
             _mapper = mapper;
             _inventoryRepository = inventoryRepository;
         }
+        public async Task<double> GetVatbyPrincipal(int? principalId)
+        {
+            string procedureName = "WMS_InventoryList";
+            var parameters = new DynamicParameters();
+            parameters.Add("PrincipalId", principalId, DbType.Int64, ParameterDirection.Input);
+            parameters.Add("RowTake",1, DbType.Int64, ParameterDirection.Input);
+            parameters.Add("PageNumber", 1, DbType.Int64, ParameterDirection.Input);
 
+            var inventories = await _genericRepository.GetAllAsync<Report>(procedureName, parameters);
+
+            if (inventories == null) return 0;
+
+            return (double)inventories.FirstOrDefault().Vat;
+        }
         public async Task<BillingDTO> GetHandlingIn(BillingURLSearch billing)
         {
-
+            if (billing.DateFrom == null || billing.DateTo == null) return new BillingDTO();
             string procedureName = "WMS_GetHandlingIn";
-
             var parameters = new DynamicParameters();
             parameters.Add("DateFrom", billing.DateFrom, DbType.String, ParameterDirection.Input);
             parameters.Add("DateTo", billing.DateTo, DbType.String, ParameterDirection.Input);
@@ -46,9 +58,8 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
         }
         public async Task<BillingDTO> GetHandlingOut(BillingURLSearch billing)
         {
-
+            if (billing.DateFrom == null || billing.DateTo == null) return new BillingDTO();
             string procedureName = "WMS_GetHandlingOut";
-
             var parameters = new DynamicParameters();
             parameters.Add("DateFrom", billing.DateFrom, DbType.String, ParameterDirection.Input);
             parameters.Add("DateTo", billing.DateTo, DbType.String, ParameterDirection.Input);
@@ -64,6 +75,7 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
 
         public async Task<BeginningBalance> BeginningBalance(BillingURLSearch billing)
         {
+         
             var procedureName = "WMS_InventoryList";
             DateTime? endDate = billing.DateFrom.Value.AddDays(-1);
             DateTime? beginningDate = new DateTime(1753, 1, 1);
@@ -74,6 +86,7 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
             parameters.Add("CargoType", billing.CargoType, DbType.Int64, ParameterDirection.Input);
             parameters.Add("RowTake", 1, DbType.Int64, ParameterDirection.Input);
             parameters.Add("PageNumber", 1, DbType.Int64, ParameterDirection.Input);
+            parameters.Add("@IsAllowZero", false, DbType.Boolean);
 
             var beginningBalance = await _genericRepository.GetFirstOrDefaultAsync<BeginningBalance>(procedureName, parameters);
             if (beginningBalance != null) beginningBalance.BillingDate = endDate;
@@ -83,6 +96,7 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
 
         public async Task<List<StorageBill>> GetStorageBill(BillingURLSearch billing, BillingDTO handlingIn, BillingDTO handlingOut)
         {
+            if (billing.DateFrom == null || billing.DateTo == null) return new List<StorageBill>();
 
             var beginningReport = await BeginningBalance(billing);
             if (beginningReport == null) return new List<StorageBill>();
@@ -135,6 +149,7 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
                     initialQuantity = initialQuantity - item.Quantity;
                     initialVolume = initialVolume - item.Volume;
                 }
+                var totalCharge = beginningReport.StorageBill * initialVolume * NoOfDays ;
 
                 var reportMapped = new StorageBill() //---MAPPING--//
                 {
@@ -147,8 +162,8 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
                     HOQuantity = item.HOQuantity,
                     HIVolume = item.HIVolume,
                     HOVolume = item.HOVolume,
-                    StorageCharge = beginningReport.StorageBill * initialVolume * NoOfDays
-                };
+                    StorageCharge = Math.Round((double)totalCharge, 2)
+            };
                 storageReports.Add(reportMapped);
             };
 

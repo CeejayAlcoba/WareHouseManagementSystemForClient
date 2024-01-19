@@ -15,5 +15,6 @@ namespace WareHouseManagementSystemForClient.Model.DTOModels.ReportModels
         public string? BatchNo { get; set; }
         public DateTime? ExpDate { get; set; }
         public string? BINLocation { get; set; }
+        public double? Vat { get; set; }
     }
 }

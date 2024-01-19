@@ -11,5 +11,6 @@
         public string? BINLocation { get; set; }
         public double? TotalQuantity { get; set; }
         public double? TotalSKU { get; set; }
+        public double? Vat { get; set; }
     }
 }
