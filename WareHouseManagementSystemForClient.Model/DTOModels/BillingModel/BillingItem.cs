@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace WareHouseManagementSystemForClient.Model.DTOModels.BillingModel
 {
-    public class BillingItem
-    {
-        public DateTime BillingDate { get; set; }
-        public double Volume { get; set; }
-        public double Quantity { get; set; }
+    //public class BillingItem
+    //{
+    //    public DateTime BillingDate { get; set; }
+    //    public double Volume { get; set; }
+    //    public double Quantity { get; set; }
 
-        public string ICR { get; set; }
-        public string OCR { get; set; }
-    }
+    //    public string ICR { get; set; }
+    //    public string OCR { get; set; }
+    //}
 }

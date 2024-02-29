@@ -11,5 +11,6 @@ namespace WareHousemanagementSystemForClient.Interfaces.Interfaces
     {
         Task<IEnumerable<T>> GetAllAsync<T>(string procedureName, DynamicParameters? parameters);
         Task<T> GetFirstOrDefaultAsync<T>(string procedureName, DynamicParameters? parameters);
+        Task<(IEnumerable<T1>, IEnumerable<T2>, IEnumerable<T3>, IEnumerable<T4>, IEnumerable<T5>)> QueryMultipleList<T1, T2, T3, T4, T5>(string procedureName, DynamicParameters parameters);
     }
 }

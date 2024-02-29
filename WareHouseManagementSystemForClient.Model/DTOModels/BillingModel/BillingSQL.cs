@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WareHouseManagementSystemForClient.Model.DTOModels.BillingModel
 {
-    public class BillingSQL
+    public class BillingSQL1
     {
         public DateTime BillingDate { get; set; }
         public double Volume { get; set; }

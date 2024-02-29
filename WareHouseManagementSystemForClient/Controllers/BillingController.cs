@@ -11,11 +11,11 @@ namespace WareHouseManagementSystemForClient.Controllers
     public class BillingController : ControllerBase
     {
         private readonly IBillingRepository _billingRepository;
-        private readonly IInventoryRepository _inventoryRepository;
-        public BillingController(IBillingRepository billingRepository, IInventoryRepository inventoryRepository)
+        private readonly IBillingDetailRepositoy _billingDetailRepositoy;
+        public BillingController(IBillingRepository billingRepository, IBillingDetailRepositoy billingDetailRepositoy)
         {
             _billingRepository = billingRepository;
-            _inventoryRepository = inventoryRepository;
+            _billingDetailRepositoy = billingDetailRepositoy;
         }
         [HttpGet]
         public async Task<IActionResult> GetBillingReport([FromQuery] BillingURLSearch billing)
@@ -25,9 +25,9 @@ namespace WareHouseManagementSystemForClient.Controllers
               
                 var handlingIn = await _billingRepository.GetHandlingIn(billing);
                 var handlingOut = await _billingRepository.GetHandlingOut(billing);
-                var storage = await _billingRepository.GetStorageBill(billing, handlingIn, handlingOut);
-                var total = handlingIn.TotalCharge + handlingOut.TotalCharge + storage.Select(c=>c.StorageCharge).Sum();
-                var vat =await _billingRepository.GetVatbyPrincipal(billing.PrincipalId) * total;
+                var storage = await _billingRepository.GetStorageBillReport(billing, handlingIn, handlingOut);
+                var total = handlingIn.TotalCharge + handlingOut.TotalCharge + storage.TotalCharge;
+                var vat =  _billingDetailRepositoy.GetBillingDetailByPrincipalId((int)billing.PrincipalId).Result.VAT * total;
                 return Ok(new OkResponse
                 {
                     Data = new
@@ -35,9 +35,9 @@ namespace WareHouseManagementSystemForClient.Controllers
                         handlingIn,
                         handlingOut,
                         storage,
-                        total = Math.Round((decimal)total,2),
-                        vat = Math.Round((decimal)vat, 2),
-                        amount = Math.Round((decimal)(vat + total), 2)
+                        Total = Math.Round((decimal)total,2),
+                        Vat = Math.Round((decimal)vat, 2),
+                        Amount = Math.Round((decimal)(vat + total), 2)
 
                     }
 

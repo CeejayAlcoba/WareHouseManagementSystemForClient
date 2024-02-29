@@ -28,7 +28,27 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
                 return result.ToList();
             }
         }
+        public async Task<(IEnumerable<T1>, IEnumerable<T2>, IEnumerable<T3>, IEnumerable<T4>, IEnumerable<T5>)> QueryMultipleList<T1,T2,T3,T4,T5>(string procedureName, DynamicParameters parameters)
+        {
+            using (var connection = _context.CreateConnection())
+            {
 
+                var mult = await connection.QueryMultipleAsync(procedureName, parameters, commandTimeout: 120,
+                commandType: CommandType.StoredProcedure);
+
+                var result1 = IsEqualToObject<T1>() ? new List<T1>() : await mult.ReadAsync<T1>();
+                var result2 = IsEqualToObject<T2>() ? new List<T2>() : await mult.ReadAsync<T2>();
+                var result3 = IsEqualToObject<T3>() ? new List<T3>() : await mult.ReadAsync<T3>();
+                var result4 = IsEqualToObject<T4>() ? new List<T4>() : await mult.ReadAsync<T4>();
+                var result5 = IsEqualToObject<T5>() ? new List<T5>() : await mult.ReadAsync<T5>();
+
+                return (result1, result2, result3, result4, result5);
+            }
+        }
+        private bool IsEqualToObject<T>()
+        {
+            return typeof(T) == typeof(object) ;
+        } 
         public async Task<T> GetFirstOrDefaultAsync<T>(string procedureName, DynamicParameters parameters)
         {
             using (var connection = _context.CreateConnection())

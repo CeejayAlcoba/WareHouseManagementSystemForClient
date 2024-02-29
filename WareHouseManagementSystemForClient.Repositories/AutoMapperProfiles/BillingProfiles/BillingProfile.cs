@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using WareHouseManagementSystemForClient.Model.DTOModels.BillingModel;
 using WareHouseManagementSystemForClient.Model.DTOModels.ReportModels;
 
-namespace WareHouseManagementSystemForClient.Repositories.AutoMapperProfiles
+namespace WareHouseManagementSystemForClient.Repositories.AutoMapperProfiles.BillingProfiles
 {
     public class BillingProfile : Profile
     {
@@ -17,8 +17,9 @@ namespace WareHouseManagementSystemForClient.Repositories.AutoMapperProfiles
                 .ForMember(dest => dest.TotalVolume, opt => opt.MapFrom(src => src.Select(c => c.TotalVolume).FirstOrDefault()))
                 .ForMember(dest => dest.TotalCharge, opt => opt.MapFrom(src => src.Select(c => c.TotalCharge).FirstOrDefault()))
                 .ForMember(dest => dest.BillingItems, opt => opt.MapFrom(src => src.ToList()));
+
             CreateMap<BillingItem, BillingDTO>();
-            CreateMap<BillingSQL,BillingItem >();
+            CreateMap<BillingSQL, BillingItem>();
         }
     }
 }
