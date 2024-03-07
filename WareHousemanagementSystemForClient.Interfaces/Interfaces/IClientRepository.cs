@@ -10,5 +10,6 @@ namespace WareHousemanagementSystemForClient.Interfaces.Interfaces
     public interface IClientRepository
     {
         Task<ClientDTO> GetClientByUsername(string username);
+        Task<int> SaveClientCredential(ClientForSave client);
     }
 }

@@ -13,16 +13,18 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
     public class GenericRepository : IGenericRepository
     {
         private readonly DapperContext _context;
+        private readonly int _commandTimeout;
         public GenericRepository(DapperContext context)
         {
+            _commandTimeout = 120;
             _context = context;
         }
         public async Task<IEnumerable<T>> GetAllAsync<T>(string procedureName, DynamicParameters parameters)
         {
-            using (var connection = _context.CreateConnection())
+            using (var connection = _context.CreateConnection())    
             {
 
-                var result = await connection.QueryAsync<T>(procedureName, parameters, commandTimeout: 120,
+                var result = await connection.QueryAsync<T>(procedureName, parameters, commandTimeout: _commandTimeout,
                 commandType: CommandType.StoredProcedure);
 
                 return result.ToList();
@@ -33,7 +35,7 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
             using (var connection = _context.CreateConnection())
             {
 
-                var mult = await connection.QueryMultipleAsync(procedureName, parameters, commandTimeout: 120,
+                var mult = await connection.QueryMultipleAsync(procedureName, parameters, commandTimeout: _commandTimeout,
                 commandType: CommandType.StoredProcedure);
 
                 var result1 = IsEqualToObject<T1>() ? new List<T1>() : await mult.ReadAsync<T1>();
@@ -54,9 +56,18 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
             using (var connection = _context.CreateConnection())
             {
                 var result = await connection.QueryFirstOrDefaultAsync<T>
-                   (procedureName, parameters, commandType: CommandType.StoredProcedure, commandTimeout: 120);
+                   (procedureName, parameters, commandType: CommandType.StoredProcedure, commandTimeout: _commandTimeout);
 
                 return result;
+            }
+        }
+        public async Task<int> ExecuteAsync(string procedureName, DynamicParameters parameters)
+        {
+            using (var connection = _context.CreateConnection())
+            {
+                var result =  await connection.ExecuteAsync
+                   (procedureName, parameters, commandType: CommandType.StoredProcedure, commandTimeout: _commandTimeout);
+                return 0;
             }
         }
     }
