@@ -19,19 +19,23 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
         }
         public async Task<ReportDTO> GetInboundList(ReportsURLSearch urlSearch)
         {
-            var procedureName = "WMS_GetInboundList";
-            var parameters = new DynamicParameters();
-            parameters.Add("CargoId", urlSearch.CargoId, DbType.Int64, ParameterDirection.Input);
-            parameters.Add("PrincipalId", urlSearch.PrincipalId, DbType.Int64, ParameterDirection.Input);
-            parameters.Add("DateFrom", urlSearch.DateFrom, DbType.DateTime, ParameterDirection.Input);
-            parameters.Add("DateTo", urlSearch.DateTo, DbType.DateTime, ParameterDirection.Input);
-            parameters.Add("Sku", urlSearch.Sku, DbType.String, ParameterDirection.Input);
-            parameters.Add("Search", urlSearch.Search, DbType.String, ParameterDirection.Input);
-            parameters.Add("CargoType", urlSearch.CargoType, DbType.Int64, ParameterDirection.Input);
-            parameters.Add("RowTake", urlSearch.RowTake, DbType.String, ParameterDirection.Input);
-            parameters.Add("PageNumber", urlSearch.PageNumber, DbType.Int64, ParameterDirection.Input);
 
-            var inbounds = await _genericRepository.GetAllAsync<Report>(procedureName, parameters);
+            var inbounds = await _genericRepository.GetAllAsync<Report>("WMS_GetInboundList",  new {
+                CargoId = urlSearch.CargoId,
+                PrincipalId = urlSearch.PrincipalId,
+                DateFrom = urlSearch.DateFrom,
+                DateTo = urlSearch.DateTo,
+                CargoType = urlSearch.CargoType,
+                RowTake = urlSearch.RowTake,
+                PageNumber = urlSearch.PageNumber,
+                SKU = urlSearch.CargoName,
+                Description = urlSearch.Description,
+                Quantity = urlSearch.Quantity,
+                UOM = urlSearch.UOM,            
+                ExpDate = urlSearch.ExpDate,
+                BINLocation = urlSearch.BINLocation
+
+            });
 
             var reportData = _mapper.Map<IEnumerable<Report>, ReportDTO>(inbounds.ToList());
 

@@ -184,6 +184,7 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
         //}
         public async Task<StorageReportModel>  GetStorageBillReport(BillingURLSearch billing, HandlingInBillDTO handlingIn, HandlingOutBillDTO handlingOut)
         {
+            if(billing.DateFrom == null|| billing.DateTo == null) return new StorageReportModel();
             StorageReportModel storageReport = new StorageReportModel();
 
             string procedureName = "WMS_GetStorage";

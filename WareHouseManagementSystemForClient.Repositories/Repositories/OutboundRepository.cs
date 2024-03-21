@@ -33,12 +33,28 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
             parameters.Add("DateFrom", urlSearch.DateFrom, DbType.DateTime, ParameterDirection.Input);
             parameters.Add("DateTo", urlSearch.DateTo, DbType.DateTime, ParameterDirection.Input);
             parameters.Add("Sku", urlSearch.Sku, DbType.String, ParameterDirection.Input);
-            parameters.Add("Search", urlSearch.Search, DbType.String, ParameterDirection.Input);
             parameters.Add("CargoType", urlSearch.CargoType, DbType.Int64, ParameterDirection.Input);
             parameters.Add("RowTake", urlSearch.RowTake, DbType.String, ParameterDirection.Input);
             parameters.Add("PageNumber", urlSearch.PageNumber, DbType.Int64, ParameterDirection.Input);
 
-            var outbounds = await _genericRepository.GetAllAsync<Report>(procedureName, parameters);
+            var outbounds = await _genericRepository.GetAllAsync<Report>(procedureName, new
+            {
+                CargoId = urlSearch.CargoId,
+                PrincipalId = urlSearch.PrincipalId,
+                DateFrom = urlSearch.DateFrom,
+                DateTo = urlSearch.DateTo,
+                CargoType = urlSearch.CargoType,
+                RowTake = urlSearch.RowTake,
+                PageNumber = urlSearch.PageNumber,
+                SKU = urlSearch.Sku ?? urlSearch.CargoName,
+                Description = urlSearch.Description,
+                Quantity = urlSearch.Quantity,
+                UOM = urlSearch.UOM,
+                BatchNo = urlSearch.BatchNo,
+                ExpDate = urlSearch.ExpDate,
+                BinLocation = urlSearch.BINLocation
+
+            });
 
             return _mapper.Map<ReportDTO>(outbounds.ToList());
 

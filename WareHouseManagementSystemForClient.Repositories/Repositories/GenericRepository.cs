@@ -19,7 +19,7 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
             _commandTimeout = 120;
             _context = context;
         }
-        public async Task<IEnumerable<T>> GetAllAsync<T>(string procedureName, DynamicParameters parameters)
+        public async Task<IEnumerable<T>> GetAllAsync<T>(string procedureName, object parameters)
         {
             using (var connection = _context.CreateConnection())    
             {
@@ -30,7 +30,7 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
                 return result.ToList();
             }
         }
-        public async Task<(IEnumerable<T1>, IEnumerable<T2>, IEnumerable<T3>, IEnumerable<T4>, IEnumerable<T5>)> QueryMultipleList<T1,T2,T3,T4,T5>(string procedureName, DynamicParameters parameters)
+        public async Task<(IEnumerable<T1>, IEnumerable<T2>, IEnumerable<T3>, IEnumerable<T4>, IEnumerable<T5>)> QueryMultipleList<T1,T2,T3,T4,T5>(string procedureName, object parameters)
         {
             using (var connection = _context.CreateConnection())
             {
@@ -50,18 +50,18 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
         private bool IsEqualToObject<T>()
         {
             return typeof(T) == typeof(object) ;
-        } 
-        public async Task<T> GetFirstOrDefaultAsync<T>(string procedureName, DynamicParameters parameters)
+        }
+        public async Task<T> GetFirstOrDefaultAsync<T>(string procedureName, object parameters) 
         {
             using (var connection = _context.CreateConnection())
             {
-                var result = await connection.QueryFirstOrDefaultAsync<T>
+             var result = await connection.QueryFirstOrDefaultAsync<T>
                    (procedureName, parameters, commandType: CommandType.StoredProcedure, commandTimeout: _commandTimeout);
 
                 return result;
             }
         }
-        public async Task<int> ExecuteAsync(string procedureName, DynamicParameters parameters)
+        public async Task<int> ExecuteAsync(string procedureName, object parameters)
         {
             using (var connection = _context.CreateConnection())
             {

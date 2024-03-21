@@ -42,7 +42,7 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
 
                 return client;
             }
-            return getClientByUsername;
+            return new ClientDTO();
         }
     }
 }
