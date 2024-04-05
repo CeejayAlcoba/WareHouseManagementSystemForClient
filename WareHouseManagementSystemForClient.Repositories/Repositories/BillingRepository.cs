@@ -216,7 +216,7 @@ namespace WareHouseManagementSystemForClient.Repositories.Repositories
                 var item = multiple.Item1.ToList()[a];
                 var nextBillingDate = a + 1 < multiple.Item1.Count() ?
                                         (multiple.Item1.ToList()[a + 1].BillingDate) : billing.DateTo;
-                var noOfDays = (nextBillingDate - item.BillingDate).Value.Days;
+                var noOfDays = (nextBillingDate.Value.Date - item.BillingDate.Value.Date).Days;
 
 
                 var storageItem = new StorageItem()
